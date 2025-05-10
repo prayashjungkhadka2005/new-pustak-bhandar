@@ -3,7 +3,7 @@ using MongoDB.Bson.Serialization.Attributes;
 
 namespace PustakBhandar.Models
 {
-    public class Announcement
+    public class Discount
     {
         [BsonId]
         [BsonRepresentation(BsonType.ObjectId)]
@@ -12,14 +12,11 @@ namespace PustakBhandar.Models
         [BsonElement("adminId")]
         public string AdminId { get; set; } = string.Empty;
 
-        [BsonElement("title")]
-        public string Title { get; set; } = string.Empty;
+        [BsonElement("description")]
+        public string Description { get; set; } = string.Empty;
 
-        [BsonElement("message")]
-        public string Message { get; set; } = string.Empty;
-
-        [BsonElement("type")]
-        public string Type { get; set; } = string.Empty; // Deal, NewArrival, Info
+        [BsonElement("percentage")]
+        public decimal Percentage { get; set; }
 
         [BsonElement("startDate")]
         public DateTime StartDate { get; set; }

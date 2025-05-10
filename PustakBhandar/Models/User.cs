@@ -4,11 +4,20 @@ using System.Collections.Generic;
 
 namespace PustakBhandar.Models
 {
-    public class User
+    public abstract class User // Made abstract as it might not be instantiated directly
     {
         [BsonId]
         [BsonRepresentation(BsonType.ObjectId)]
         public string Id { get; set; } = ObjectId.GenerateNewId().ToString();
+
+        [BsonElement("createdAt")]
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    }
+
+    public class Member : User
+    {
+        [BsonElement("fullName")]
+        public string FullName { get; set; } = string.Empty;
 
         [BsonElement("email")]
         public string Email { get; set; } = string.Empty;
@@ -16,113 +25,55 @@ namespace PustakBhandar.Models
         [BsonElement("passwordHash")]
         public string PasswordHash { get; set; } = string.Empty;
 
-        [BsonElement("firstName")]
-        public string FirstName { get; set; } = string.Empty;
+        [BsonElement("roleId")]
+        public string RoleId { get; set; } = "member"; // Default role for Member
 
-        [BsonElement("lastName")]
-        public string LastName { get; set; } = string.Empty;
+        [BsonElement("joinDate")]
+        public DateTime JoinDate { get; set; } = DateTime.UtcNow;
 
-        [BsonElement("role")]
-        public string Role { get; set; } = "Member"; // Member, Admin, Staff
+        [BsonElement("totalOrders")]
+        public int TotalOrders { get; set; }
 
-        [BsonElement("membershipId")]
-        public string MembershipId { get; set; } = string.Empty;
+        [BsonElement("discountEarned")]
+        public decimal DiscountEarned { get; set; }
 
         [BsonElement("whitelist")]
         public List<string> Whitelist { get; set; } = new List<string>(); // Book IDs
 
         [BsonElement("cart")]
-        public Cart Cart { get; set; } = new Cart();
+        public List<string> Cart { get; set; } = new List<string>(); // Cart IDs
 
         [BsonElement("orders")]
-        public List<Order> Orders { get; set; } = new List<Order>();
-
-        [BsonElement("successfulOrdersCount")]
-        public int SuccessfulOrdersCount { get; set; }
-
-        [BsonElement("hasStackableDiscount")]
-        public bool HasStackableDiscount { get; set; }
-
-        [BsonElement("createdAt")]
-        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-
-        [BsonElement("lastLogin")]
-        public DateTime? LastLogin { get; set; }
+        public List<string> Orders { get; set; } = new List<string>(); // Order IDs
     }
 
-    public class Cart
+    public class Admin : User
     {
-        [BsonElement("items")]
-        public List<CartItem> Items { get; set; } = new List<CartItem>();
+        [BsonElement("fullName")]
+        public string FullName { get; set; } = string.Empty;
 
-        [BsonElement("totalAmount")]
-        public decimal TotalAmount { get; set; }
+        [BsonElement("email")]
+        public string Email { get; set; } = string.Empty;
 
-        [BsonElement("discountAmount")]
-        public decimal DiscountAmount { get; set; }
+        [BsonElement("passwordHash")]
+        public string PasswordHash { get; set; } = string.Empty;
 
-        [BsonElement("finalAmount")]
-        public decimal FinalAmount { get; set; }
+        [BsonElement("roleId")]
+        public string RoleId { get; set; } = "admin"; // Default role for Admin
     }
 
-    public class CartItem
+    public class Staff : User
     {
-        [BsonElement("bookId")]
-        public string BookId { get; set; } = string.Empty;
+        [BsonElement("fullName")]
+        public string FullName { get; set; } = string.Empty;
 
-        [BsonElement("quantity")]
-        public int Quantity { get; set; }
+        [BsonElement("email")]
+        public string Email { get; set; } = string.Empty;
 
-        [BsonElement("price")]
-        public decimal Price { get; set; }
-    }
+        [BsonElement("passwordHash")]
+        public string PasswordHash { get; set; } = string.Empty;
 
-    public class Order
-    {
-        [BsonId]
-        [BsonRepresentation(BsonType.ObjectId)]
-        public string Id { get; set; } = ObjectId.GenerateNewId().ToString();
-
-        [BsonElement("items")]
-        public List<OrderItem> Items { get; set; } = new List<OrderItem>();
-
-        [BsonElement("totalAmount")]
-        public decimal TotalAmount { get; set; }
-
-        [BsonElement("discountAmount")]
-        public decimal DiscountAmount { get; set; }
-
-        [BsonElement("finalAmount")]
-        public decimal FinalAmount { get; set; }
-
-        [BsonElement("status")]
-        public string Status { get; set; } = "Pending"; // Pending, Confirmed, Cancelled, Completed
-
-        [BsonElement("claimCode")]
-        public string ClaimCode { get; set; } = string.Empty;
-
-        [BsonElement("orderDate")]
-        public DateTime OrderDate { get; set; } = DateTime.UtcNow;
-
-        [BsonElement("pickupDate")]
-        public DateTime? PickupDate { get; set; }
-
-        [BsonElement("cancellationDate")]
-        public DateTime? CancellationDate { get; set; }
-    }
-
-    public class OrderItem
-    {
-        [BsonElement("bookId")]
-        public string BookId { get; set; } = string.Empty;
-
-        [BsonElement("quantity")]
-        public int Quantity { get; set; }
-
-        [BsonElement("price")]
-        public decimal Price { get; set; }
-
-        [BsonElement("discount")]
-        public decimal Discount { get; set; }
+        [BsonElement("roleId")]
+        public string RoleId { get; set; } = "staff"; // Default role for Staff
     }
 } 
