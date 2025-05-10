@@ -1,24 +1,25 @@
-using MongoDB.Bson;
-using MongoDB.Bson.Serialization.Attributes;
+using System;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace PustakBhandar.Models
 {
     public class Session
     {
-        [BsonId]
-        [BsonRepresentation(BsonType.ObjectId)]
-        public string Id { get; set; } = ObjectId.GenerateNewId().ToString();
+        [Key]
+        public string Id { get; set; } = Guid.NewGuid().ToString();
 
-        [BsonElement("memberId")]
-        public string MemberId { get; set; } = string.Empty;
+        [Required]
+        public string UserId { get; set; } = string.Empty;
+        [ForeignKey("UserId")]
+        public virtual ApplicationUser? User { get; set; }
 
-        [BsonElement("token")]
-        public string Token { get; set; } = string.Empty;
+        [Required]
+        public DateTime ExpiresAt { get; set; }
 
-        [BsonElement("expiryDate")]
-        public DateTime ExpiryDate { get; set; }
+        [Required]
+        public bool IsActive { get; set; } = true;
 
-        [BsonElement("createdAt")]
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     }
 } 

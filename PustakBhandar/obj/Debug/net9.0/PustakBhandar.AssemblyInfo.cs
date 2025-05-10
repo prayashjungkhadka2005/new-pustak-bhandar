@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("PustakBhandar")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+63c17b53dc904e6499010559544da4ecb79e5ce1")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+a48ef8d4c2779325b68b06fd6db7ed2b2afe8faa")]
 [assembly: System.Reflection.AssemblyProductAttribute("PustakBhandar")]
 [assembly: System.Reflection.AssemblyTitleAttribute("PustakBhandar")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

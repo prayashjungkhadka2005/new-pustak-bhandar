@@ -1,39 +1,37 @@
-using MongoDB.Bson;
-using MongoDB.Bson.Serialization.Attributes;
+using System;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace PustakBhandar.Models
 {
     public class Announcement
     {
-        [BsonId]
-        [BsonRepresentation(BsonType.ObjectId)]
-        public string Id { get; set; } = ObjectId.GenerateNewId().ToString();
+        [Key]
+        public string Id { get; set; } = Guid.NewGuid().ToString();
 
-        [BsonElement("adminId")]
-        public string AdminId { get; set; } = string.Empty;
+        [Required]
+        public string AdminId { get; set; } = string.Empty; // ID of the Admin who created it
+        [ForeignKey("AdminId")]
+        public virtual Admin? Admin { get; set; }
 
-        [BsonElement("title")]
+        [Required]
+        [StringLength(200)]
         public string Title { get; set; } = string.Empty;
 
-        [BsonElement("message")]
+        [Required]
+        [Column(TypeName = "text")]
         public string Message { get; set; } = string.Empty;
 
-        [BsonElement("type")]
+        [StringLength(50)]
         public string Type { get; set; } = string.Empty; // Deal, NewArrival, Info
 
-        [BsonElement("startDate")]
+        [Required]
         public DateTime StartDate { get; set; }
-
-        [BsonElement("endDate")]
+        [Required]
         public DateTime EndDate { get; set; }
-
-        [BsonElement("isActive")]
         public bool IsActive { get; set; }
 
-        [BsonElement("createdAt")]
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-
-        [BsonElement("updatedAt")]
         public DateTime? UpdatedAt { get; set; }
     }
 } 

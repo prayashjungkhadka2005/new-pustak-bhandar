@@ -1,17 +1,14 @@
-using MongoDB.Bson;
-using MongoDB.Bson.Serialization.Attributes;
+using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.AspNetCore.Identity;
 
 namespace PustakBhandar.Models
 {
-    public class Role
+    public class Role : IdentityRole
     {
-        [BsonId]
-        public string Id { get; set; } = string.Empty;
-
-        [BsonElement("roleName")]
-        public string RoleName { get; set; } = string.Empty;
-
-        [BsonElement("createdAt")]
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public virtual ICollection<ApplicationUser>? Users { get; set; } = new List<ApplicationUser>();
     }
 } 

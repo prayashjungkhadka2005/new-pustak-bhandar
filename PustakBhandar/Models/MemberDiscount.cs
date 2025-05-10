@@ -1,27 +1,26 @@
-using MongoDB.Bson;
-using MongoDB.Bson.Serialization.Attributes;
+using System;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace PustakBhandar.Models
 {
     public class MemberDiscount
     {
-        [BsonId]
-        [BsonRepresentation(BsonType.ObjectId)]
-        public string Id { get; set; } = ObjectId.GenerateNewId().ToString();
+        [Key]
+        public string Id { get; set; } = Guid.NewGuid().ToString();
 
-        [BsonElement("memberId")]
+        [Required]
         public string MemberId { get; set; } = string.Empty;
+        [ForeignKey("MemberId")]
+        public virtual Member? Member { get; set; }
 
-        [BsonElement("discountId")]
+        [Required]
         public string DiscountId { get; set; } = string.Empty;
+        [ForeignKey("DiscountId")]
+        public virtual Discount? Discount { get; set; }
 
-        [BsonElement("isStackable")]
         public bool IsStackable { get; set; }
-
-        [BsonElement("appliedDate")]
         public DateTime AppliedDate { get; set; } = DateTime.UtcNow;
-
-        [BsonElement("isActive")]
         public bool IsActive { get; set; }
     }
 } 

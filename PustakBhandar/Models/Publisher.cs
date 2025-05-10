@@ -1,24 +1,26 @@
-using MongoDB.Bson;
-using MongoDB.Bson.Serialization.Attributes;
+using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace PustakBhandar.Models
 {
     public class Publisher
     {
-        [BsonId]
-        [BsonRepresentation(BsonType.ObjectId)]
-        public string Id { get; set; } = ObjectId.GenerateNewId().ToString();
+        [Key]
+        public string Id { get; set; } = Guid.NewGuid().ToString();
 
-        [BsonElement("name")]
+        [Required]
+        [StringLength(100)]
         public string Name { get; set; } = string.Empty;
 
-        [BsonElement("address")]
-        public string Address { get; set; } = string.Empty;
+        [Column(TypeName = "text")]
+        public string? Address { get; set; }
 
-        [BsonElement("createdAt")]
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-
-        [BsonElement("updatedAt")]
         public DateTime? UpdatedAt { get; set; }
+
+        // Navigation property for Books by this Publisher
+        public virtual ICollection<Book>? Books { get; set; } = new List<Book>();
     }
 } 

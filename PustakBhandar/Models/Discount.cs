@@ -1,36 +1,41 @@
-using MongoDB.Bson;
-using MongoDB.Bson.Serialization.Attributes;
+using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace PustakBhandar.Models
 {
     public class Discount
     {
-        [BsonId]
-        [BsonRepresentation(BsonType.ObjectId)]
-        public string Id { get; set; } = ObjectId.GenerateNewId().ToString();
+        [Key]
+        public string Id { get; set; } = Guid.NewGuid().ToString();
 
-        [BsonElement("adminId")]
-        public string AdminId { get; set; } = string.Empty;
+        [Required]
+        public string AdminId { get; set; } = string.Empty; // ID of the Admin who created it
+        [ForeignKey("AdminId")]
+        public virtual Admin? Admin { get; set; }
 
-        [BsonElement("description")]
+        [Required]
+        [Column(TypeName = "text")]
         public string Description { get; set; } = string.Empty;
 
-        [BsonElement("percentage")]
+        [Required]
+        [Column(TypeName = "decimal(5, 2)")] // e.g., 10.50 for 10.50%
         public decimal Percentage { get; set; }
 
-        [BsonElement("startDate")]
+        [Required]
         public DateTime StartDate { get; set; }
-
-        [BsonElement("endDate")]
+        [Required]
         public DateTime EndDate { get; set; }
-
-        [BsonElement("isActive")]
         public bool IsActive { get; set; }
 
-        [BsonElement("createdAt")]
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-
-        [BsonElement("updatedAt")]
         public DateTime? UpdatedAt { get; set; }
+
+        // Navigation property for Books this Discount applies to
+        public virtual ICollection<Book>? Books { get; set; } = new List<Book>();
+
+        // Navigation property for MemberDiscounts using this Discount
+        public virtual ICollection<MemberDiscount>? MemberDiscounts { get; set; } = new List<MemberDiscount>();
     }
 } 

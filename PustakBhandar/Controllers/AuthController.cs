@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using MongoDB.Driver;
+using Microsoft.EntityFrameworkCore;
 using PustakBhandar.Data;
 using PustakBhandar.DTOs;
 using PustakBhandar.Models;
@@ -8,6 +8,7 @@ using PustakBhandar.Services;
 using System.Security.Cryptography;
 using System.Text;
 using System.Security.Claims;
+using Microsoft.AspNetCore.Identity;
 
 namespace PustakBhandar.Controllers
 {
@@ -15,146 +16,262 @@ namespace PustakBhandar.Controllers
     [Route("api/[controller]")]
     public class AuthController : ControllerBase
     {
-        private readonly MongoDbContext _context;
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly SignInManager<ApplicationUser> _signInManager;
+        private readonly RoleManager<IdentityRole> _roleManager;
         private readonly JwtService _jwtService;
-        private readonly IConfiguration _configuration;
+        private readonly ILogger<AuthController> _logger;
 
-        public AuthController(MongoDbContext context, JwtService jwtService, IConfiguration configuration)
+        public AuthController(
+            UserManager<ApplicationUser> userManager,
+            SignInManager<ApplicationUser> signInManager,
+            RoleManager<IdentityRole> roleManager,
+            JwtService jwtService,
+            ILogger<AuthController> logger)
         {
-            _context = context;
+            _userManager = userManager;
+            _signInManager = signInManager;
+            _roleManager = roleManager;
             _jwtService = jwtService;
-            _configuration = configuration;
+            _logger = logger;
+        }
+
+        [HttpGet("setup-roles")]
+        public async Task<IActionResult> SetupRoles()
+        {
+            try
+            {
+                var roles = new[]
+                {
+                    new { Name = "Admin", Permissions = new[] { "manage_books", "manage_discounts", "manage_announcements", "manage_users", "view_reports" } },
+                    new { Name = "Staff", Permissions = new[] { "process_orders", "manage_claim_codes", "view_orders" } },
+                    new { Name = "Member", Permissions = new[] { "place_orders", "manage_cart", "leave_reviews", "view_books" } }
+                };
+
+                foreach (var role in roles)
+                {
+                    if (!await _roleManager.RoleExistsAsync(role.Name))
+                    {
+                        await _roleManager.CreateAsync(new IdentityRole(role.Name));
+                    }
+                }
+
+                return Ok("Roles setup completed");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error setting up roles");
+                return StatusCode(500, "An error occurred while setting up roles");
+            }
         }
 
         [HttpPost("register")]
-        public async Task<ActionResult<AuthResponse>> Register(RegisterRequest request)
+        public async Task<IActionResult> Register(RegisterDto model)
         {
-            // Check if user already exists
-            var existingUser = await _context.Users.Find(u => u.Email == request.Email).FirstOrDefaultAsync();
-            if (existingUser != null)
+            try
             {
-                return BadRequest("User with this email already exists");
-            }
-
-            // Validate role
-            string role = "Member";
-            if (!string.IsNullOrEmpty(request.Role))
-            {
-                var allowedRoles = new[] { "Member", "Admin" };
-                if (!allowedRoles.Contains(request.Role))
+                if (!ModelState.IsValid)
                 {
-                    return BadRequest("Invalid role specified");
+                    return BadRequest(ModelState);
                 }
-                role = request.Role;
+
+                var user = new ApplicationUser
+                {
+                    UserName = model.Email,
+                    Email = model.Email,
+                    FullName = model.FullName,
+                    PhoneNumber = model.PhoneNumber
+                };
+
+                var result = await _userManager.CreateAsync(user, model.Password);
+                if (!result.Succeeded)
+                {
+                    return BadRequest(result.Errors);
+                }
+
+                // Assign role
+                if (!await _roleManager.RoleExistsAsync("Member"))
+                {
+                    await _roleManager.CreateAsync(new IdentityRole("Member"));
+                }
+                await _userManager.AddToRoleAsync(user, "Member");
+
+                var token = await _jwtService.GenerateJwtToken(user);
+                return Ok(new { Token = token });
             }
-
-            // Generate membership ID
-            var membershipId = GenerateMembershipId();
-
-            // Create new user
-            var user = new User
+            catch (Exception ex)
             {
-                Email = request.Email,
-                PasswordHash = HashPassword(request.Password),
-                FirstName = request.FirstName,
-                LastName = request.LastName,
-                Role = role,
-                MembershipId = membershipId,
-                CreatedAt = DateTime.UtcNow
-            };
-
-            await _context.Users.InsertOneAsync(user);
-
-            // Generate JWT token
-            var token = _jwtService.GenerateToken(user);
-
-            return new AuthResponse
-            {
-                Token = token,
-                UserId = user.Id,
-                Email = user.Email,
-                Role = user.Role,
-                MembershipId = user.MembershipId
-            };
+                _logger.LogError(ex, "Error during user registration");
+                return StatusCode(500, "An error occurred during registration");
+            }
         }
 
         [HttpPost("login")]
-        public async Task<ActionResult<AuthResponse>> Login(LoginRequest request)
+        public async Task<IActionResult> Login(LoginDto model)
         {
-            var user = await _context.Users.Find(u => u.Email == request.Email).FirstOrDefaultAsync();
-            if (user == null)
+            try
             {
-                return Unauthorized("Invalid email or password");
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(ModelState);
+                }
+
+                var user = await _userManager.FindByEmailAsync(model.Email);
+                if (user == null)
+                {
+                    return Unauthorized("Invalid email or password");
+                }
+
+                var result = await _signInManager.CheckPasswordSignInAsync(user, model.Password, false);
+                if (!result.Succeeded)
+                {
+                    return Unauthorized("Invalid email or password");
+                }
+
+                var token = await _jwtService.GenerateJwtToken(user);
+                return Ok(new { Token = token });
             }
-
-            if (!VerifyPassword(request.Password, user.PasswordHash))
+            catch (Exception ex)
             {
-                return Unauthorized("Invalid email or password");
+                _logger.LogError(ex, "Error during user login");
+                return StatusCode(500, "An error occurred during login");
             }
+        }
 
-            // Update last login
-            user.LastLogin = DateTime.UtcNow;
-            await _context.Users.ReplaceOneAsync(u => u.Id == user.Id, user);
-
-            // Generate JWT token
-            var token = _jwtService.GenerateToken(user);
-
-            return new AuthResponse
+        [HttpPost("logout")]
+        public async Task<IActionResult> Logout()
+        {
+            try
             {
-                Token = token,
-                UserId = user.Id,
-                Email = user.Email,
-                Role = user.Role,
-                MembershipId = user.MembershipId
-            };
+                await _signInManager.SignOutAsync();
+                return Ok("Logged out successfully");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error during user logout");
+                return StatusCode(500, "An error occurred during logout");
+            }
+        }
+
+        [HttpGet("me")]
+        public async Task<ActionResult<UserProfileResponse>> GetCurrentUser()
+        {
+            try
+            {
+                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (string.IsNullOrEmpty(userId))
+                {
+                    return Unauthorized();
+                }
+
+                var user = await _userManager.FindByIdAsync(userId);
+                if (user == null)
+                {
+                    return NotFound("User not found");
+                }
+
+                var roles = await _userManager.GetRolesAsync(user);
+                return new UserProfileResponse
+                {
+                    Id = user.Id,
+                    Email = user.Email ?? string.Empty,
+                    FullName = user.FullName ?? string.Empty,
+                    PhoneNumber = user.PhoneNumber,
+                    Roles = roles.ToList()
+                };
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting current user");
+                return StatusCode(500, "An error occurred while getting user information");
+            }
         }
 
         [Authorize]
-        [HttpGet("me")]
-        public async Task<ActionResult<object>> GetCurrentUser()
+        [HttpPut("profile")]
+        public async Task<ActionResult<UserProfileResponse>> UpdateProfile(UpdateProfileRequest request)
         {
-            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (string.IsNullOrEmpty(userId))
+            try
             {
-                return Unauthorized();
+                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (string.IsNullOrEmpty(userId))
+                {
+                    return Unauthorized();
+                }
+
+                var user = await _userManager.FindByIdAsync(userId);
+                if (user == null)
+                {
+                    return NotFound("User not found");
+                }
+
+                if (!string.IsNullOrEmpty(request.FullName))
+                {
+                    user.FullName = request.FullName;
+                }
+
+                if (!string.IsNullOrEmpty(request.Email))
+                {
+                    var existingUser = await _userManager.FindByEmailAsync(request.Email);
+                    if (existingUser != null && existingUser.Id != userId)
+                    {
+                        return BadRequest("Email is already taken");
+                    }
+                    user.Email = request.Email;
+                    user.UserName = request.Email;
+                }
+
+                if (!string.IsNullOrEmpty(request.PhoneNumber))
+                {
+                    user.PhoneNumber = request.PhoneNumber;
+                }
+
+                var result = await _userManager.UpdateAsync(user);
+                if (!result.Succeeded)
+                {
+                    return BadRequest(result.Errors);
+                }
+
+                return await GetCurrentUser();
             }
-
-            var user = await _context.Users.Find(u => u.Id == userId).FirstOrDefaultAsync();
-            if (user == null)
+            catch (Exception ex)
             {
-                return NotFound("User not found");
+                _logger.LogError(ex, "Error updating user profile");
+                return StatusCode(500, "An error occurred while updating profile");
             }
+        }
 
-            return new
+        [Authorize]
+        [HttpPost("change-password")]
+        public async Task<IActionResult> ChangePassword(ChangePasswordRequest request)
+        {
+            try
             {
-                user.Id,
-                user.Email,
-                user.FirstName,
-                user.LastName,
-                user.Role,
-                user.MembershipId,
-                user.LastLogin
-            };
-        }
+                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (string.IsNullOrEmpty(userId))
+                {
+                    return Unauthorized();
+                }
 
-        private string HashPassword(string password)
-        {
-            using var sha256 = SHA256.Create();
-            var hashedBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(password));
-            return Convert.ToBase64String(hashedBytes);
-        }
+                var user = await _userManager.FindByIdAsync(userId);
+                if (user == null)
+                {
+                    return NotFound("User not found");
+                }
 
-        private bool VerifyPassword(string password, string hash)
-        {
-            return HashPassword(password) == hash;
-        }
+                var result = await _userManager.ChangePasswordAsync(user, request.CurrentPassword, request.NewPassword);
+                if (!result.Succeeded)
+                {
+                    return BadRequest(result.Errors);
+                }
 
-        private string GenerateMembershipId()
-        {
-            // Generate a unique membership ID (e.g., PB-2024-XXXXX)
-            var random = new Random();
-            var number = random.Next(10000, 99999);
-            return $"PB-{DateTime.UtcNow.Year}-{number}";
+                return Ok("Password changed successfully");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error changing password");
+                return StatusCode(500, "An error occurred while changing password");
+            }
         }
     }
 } 

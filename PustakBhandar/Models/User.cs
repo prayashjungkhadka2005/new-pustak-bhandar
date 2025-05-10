@@ -1,79 +1,46 @@
-using MongoDB.Bson;
-using MongoDB.Bson.Serialization.Attributes;
+using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.AspNetCore.Identity;
 
 namespace PustakBhandar.Models
 {
-    public abstract class User // Made abstract as it might not be instantiated directly
+    public class ApplicationUser : IdentityUser
     {
-        [BsonId]
-        [BsonRepresentation(BsonType.ObjectId)]
-        public string Id { get; set; } = ObjectId.GenerateNewId().ToString();
+        [Required]
+        [StringLength(100)]
+        public string FullName { get; set; } = string.Empty;
 
-        [BsonElement("createdAt")]
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     }
 
-    public class Member : User
+    public class Member : ApplicationUser
     {
-        [BsonElement("fullName")]
-        public string FullName { get; set; } = string.Empty;
-
-        [BsonElement("email")]
-        public string Email { get; set; } = string.Empty;
-
-        [BsonElement("passwordHash")]
-        public string PasswordHash { get; set; } = string.Empty;
-
-        [BsonElement("roleId")]
-        public string RoleId { get; set; } = "member"; // Default role for Member
-
-        [BsonElement("joinDate")]
         public DateTime JoinDate { get; set; } = DateTime.UtcNow;
-
-        [BsonElement("totalOrders")]
         public int TotalOrders { get; set; }
 
-        [BsonElement("discountEarned")]
+        [Column(TypeName = "decimal(10, 2)")]
         public decimal DiscountEarned { get; set; }
 
-        [BsonElement("whitelist")]
-        public List<string> Whitelist { get; set; } = new List<string>(); // Book IDs
-
-        [BsonElement("cart")]
-        public List<string> Cart { get; set; } = new List<string>(); // Cart IDs
-
-        [BsonElement("orders")]
-        public List<string> Orders { get; set; } = new List<string>(); // Order IDs
+        // Assuming Whitelist, Cart, and Orders store Book Ids.
+        // These will be navigation properties to Book entities.
+        // We will need join tables for many-to-many relationships if a Book can be in multiple Carts/Orders/Whitelists
+        // or a User can have multiple instances of the same book in different contexts.
+        // For simplicity, let's assume direct navigation for now, and refine later.
+        public virtual ICollection<Wishlist>? WishlistEntries { get; set; } = new List<Wishlist>();
+        public virtual ICollection<CartItem>? CartItems { get; set; } = new List<CartItem>();
+        public virtual ICollection<Order>? Orders { get; set; } = new List<Order>();
+        public virtual ICollection<Review>? Reviews { get; set; } = new List<Review>();
     }
 
-    public class Admin : User
+    public class Admin : ApplicationUser
     {
-        [BsonElement("fullName")]
-        public string FullName { get; set; } = string.Empty;
-
-        [BsonElement("email")]
-        public string Email { get; set; } = string.Empty;
-
-        [BsonElement("passwordHash")]
-        public string PasswordHash { get; set; } = string.Empty;
-
-        [BsonElement("roleId")]
-        public string RoleId { get; set; } = "admin"; // Default role for Admin
+        // Admin-specific properties can be added here if any
     }
 
-    public class Staff : User
+    public class Staff : ApplicationUser
     {
-        [BsonElement("fullName")]
-        public string FullName { get; set; } = string.Empty;
-
-        [BsonElement("email")]
-        public string Email { get; set; } = string.Empty;
-
-        [BsonElement("passwordHash")]
-        public string PasswordHash { get; set; } = string.Empty;
-
-        [BsonElement("roleId")]
-        public string RoleId { get; set; } = "staff"; // Default role for Staff
+        // Staff-specific properties can be added here if any
     }
 } 

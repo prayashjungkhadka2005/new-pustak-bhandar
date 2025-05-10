@@ -1,49 +1,64 @@
-using MongoDB.Bson;
-using MongoDB.Bson.Serialization.Attributes;
+using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace PustakBhandar.Models
 {
     public class Order
     {
-        [BsonId]
-        [BsonRepresentation(BsonType.ObjectId)]
-        public string Id { get; set; } = ObjectId.GenerateNewId().ToString();
+        [Key]
+        public string Id { get; set; } = Guid.NewGuid().ToString();
 
-        [BsonElement("memberId")]
+        [Required]
         public string MemberId { get; set; } = string.Empty;
+        [ForeignKey("MemberId")]
+        public virtual Member? Member { get; set; }
 
-        [BsonElement("orderDate")]
         public DateTime OrderDate { get; set; } = DateTime.UtcNow;
 
-        [BsonElement("totalAmount")]
+        [Required]
+        [Column(TypeName = "decimal(10, 2)")]
         public decimal TotalAmount { get; set; }
 
-        [BsonElement("discountApplied")]
+        [Column(TypeName = "decimal(10, 2)")]
         public decimal DiscountApplied { get; set; }
 
-        [BsonElement("claimCode")]
+        [Required]
+        [StringLength(50)]
         public string ClaimCode { get; set; } = string.Empty;
 
-        [BsonElement("status")]
+        [Required]
+        [StringLength(50)]
         public string Status { get; set; } = "Pending"; // Pending, Confirmed, Cancelled, Completed
 
-        [BsonElement("processedBy")]
-        public string? ProcessedBy { get; set; } // Staff ID
+        public string? ProcessedByStaffId { get; set; } // Staff ID
+        [ForeignKey("ProcessedByStaffId")]
+        public virtual Staff? ProcessedByStaff { get; set; }
 
-        [BsonElement("items")]
-        public List<OrderItem> Items { get; set; } = new List<OrderItem>();
+        public virtual ICollection<OrderItem> Items { get; set; } = new List<OrderItem>();
     }
 
     public class OrderItem
     {
-        [BsonElement("bookId")]
-        public string BookId { get; set; } = string.Empty;
+        [Key]
+        public int Id { get; set; }
+        
+        [Required]
+        public string OrderId { get; set; } = string.Empty;
+        [ForeignKey("OrderId")]
+        public virtual Order? Order { get; set; }
 
-        [BsonElement("quantity")]
+        [Required]
+        public string BookId { get; set; } = string.Empty;
+        [ForeignKey("BookId")]
+        public virtual Book? Book { get; set; }
+
+        [Required]
         public int Quantity { get; set; }
 
-        [BsonElement("price")]
+        [Required]
+        [Column(TypeName = "decimal(10, 2)")]
         public decimal Price { get; set; }
     }
 } 
