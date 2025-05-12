@@ -27,6 +27,9 @@ namespace PustakBhandar.DTOs
 
         [Phone]
         public string? PhoneNumber { get; set; }
+
+        [Required]
+        public string UserType { get; set; } = "Member"; // Default to Member, can be "Admin", "Staff", or "Member"
     }
 
     public class LoginDto
@@ -41,14 +44,13 @@ namespace PustakBhandar.DTOs
 
     public class AuthResponse
     {
-        public string Token { get; set; } = string.Empty; // JWT Token
-        public string SessionId { get; set; } = string.Empty; // For session tracking
-        public int UserId { get; set; }
+        public string Token { get; set; } = string.Empty;
+        public string SessionId { get; set; } = string.Empty;
+        public string UserId { get; set; } = string.Empty;
         public string Email { get; set; } = string.Empty;
         public string FullName { get; set; } = string.Empty;
-        public RoleDTO Role { get; set; } = new RoleDTO();
+        public List<string> Permissions { get; set; } = new List<string>();
         public DateTime TokenExpiration { get; set; }
-        public List<string> Permissions { get; set; } = new List<string>(); // User's permissions based on role
     }
 
     public class UserProfileResponse

@@ -1,10 +1,9 @@
-using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace PustakBhandar.Models
 {
-    public class Wishlist
+    public class Cart
     {
         [Key]
         public string Id { get; set; } = Guid.NewGuid().ToString();
@@ -14,11 +13,12 @@ namespace PustakBhandar.Models
         [ForeignKey("UserId")]
         public virtual ApplicationUser? User { get; set; }
 
-        [Required]
-        public string BookId { get; set; } = string.Empty;
-        [ForeignKey("BookId")]
-        public virtual Book? Book { get; set; }
+        public virtual ICollection<CartItem> Items { get; set; } = new List<CartItem>();
 
-        public DateTime AddedAt { get; set; } = DateTime.UtcNow; // Optional: to track when it was added
+        [Column(TypeName = "decimal(10, 2)")]
+        public decimal TotalAmount { get; set; }
+
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
     }
 } 

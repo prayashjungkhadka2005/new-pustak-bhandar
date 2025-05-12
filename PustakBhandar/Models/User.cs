@@ -12,7 +12,17 @@ namespace PustakBhandar.Models
         [StringLength(100)]
         public string FullName { get; set; } = string.Empty;
 
+        public string RefreshToken { get; set; } = string.Empty;
+        public DateTime RefreshTokenExpiryTime { get; set; }
+
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
+        // Navigation properties
+        public virtual Cart? Cart { get; set; }
+        public virtual Wishlist? Wishlist { get; set; }
+        public virtual ICollection<Order> Orders { get; set; } = new List<Order>();
+        public virtual ICollection<Review> Reviews { get; set; } = new List<Review>();
+        public virtual ICollection<Notification> Notifications { get; set; } = new List<Notification>();
     }
 
     public class Member : ApplicationUser
@@ -23,15 +33,9 @@ namespace PustakBhandar.Models
         [Column(TypeName = "decimal(10, 2)")]
         public decimal DiscountEarned { get; set; }
 
-        // Assuming Whitelist, Cart, and Orders store Book Ids.
-        // These will be navigation properties to Book entities.
-        // We will need join tables for many-to-many relationships if a Book can be in multiple Carts/Orders/Whitelists
-        // or a User can have multiple instances of the same book in different contexts.
-        // For simplicity, let's assume direct navigation for now, and refine later.
+        // Member-specific collections
         public virtual ICollection<Wishlist>? WishlistEntries { get; set; } = new List<Wishlist>();
         public virtual ICollection<CartItem>? CartItems { get; set; } = new List<CartItem>();
-        public virtual ICollection<Order>? Orders { get; set; } = new List<Order>();
-        public virtual ICollection<Review>? Reviews { get; set; } = new List<Review>();
     }
 
     public class Admin : ApplicationUser

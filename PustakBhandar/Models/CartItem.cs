@@ -3,15 +3,15 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace PustakBhandar.Models
 {
-    public class CartItem // Renamed from Cart, represents an item in a member's cart
+    public class CartItem
     {
         [Key]
         public string Id { get; set; } = Guid.NewGuid().ToString();
 
         [Required]
-        public string MemberId { get; set; } = string.Empty;
-        [ForeignKey("MemberId")]
-        public virtual Member? Member { get; set; }
+        public string CartId { get; set; } = string.Empty;
+        [ForeignKey("CartId")]
+        public virtual Cart? Cart { get; set; }
 
         [Required]
         public string BookId { get; set; } = string.Empty;
@@ -21,6 +21,11 @@ namespace PustakBhandar.Models
         [Required]
         public int Quantity { get; set; }
 
-        public DateTime AddedAt { get; set; } = DateTime.UtcNow;
+        [Required]
+        [Column(TypeName = "decimal(10, 2)")]
+        public decimal Price { get; set; }
+
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
     }
 } 
