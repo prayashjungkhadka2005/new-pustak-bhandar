@@ -18,4 +18,43 @@ namespace PustakBhandar.DTOs
         [Required]
         public string BookId { get; set; } = string.Empty;
     }
+
+    public class CartItemResponse
+    {
+        public string Id { get; set; } = string.Empty;
+        public string BookId { get; set; } = string.Empty;
+        public string Title { get; set; } = string.Empty;
+        public string Author { get; set; } = string.Empty;
+        public string? CoverImageUrl { get; set; }
+        public decimal Price { get; set; }
+        public int Quantity { get; set; }
+        public decimal Subtotal { get; set; }
+        public DateTime AddedAt { get; set; }
+    }
+
+    public class CartResponse
+    {
+        public string Id { get; set; } = string.Empty;
+        public List<CartItemResponse> Items { get; set; } = new List<CartItemResponse>();
+        public decimal TotalAmount { get; set; }
+        public int TotalItems { get; set; }
+        public DateTime UpdatedAt { get; set; }
+    }
+
+    public class AddToCartRequest
+    {
+        [Required]
+        public string BookId { get; set; } = string.Empty;
+
+        [Required]
+        [Range(1, int.MaxValue, ErrorMessage = "Quantity must be at least 1")]
+        public int Quantity { get; set; }
+    }
+
+    public class UpdateCartItemRequest
+    {
+        [Required]
+        [Range(1, int.MaxValue, ErrorMessage = "Quantity must be at least 1")]
+        public int Quantity { get; set; }
+    }
 } 

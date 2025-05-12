@@ -12,8 +12,8 @@ using PustakBhandar.Data;
 namespace PustakBhandar.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250512090721_AddCoverImageUrlToBooks")]
-    partial class AddCoverImageUrlToBooks
+    [Migration("20250512093552_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -402,7 +402,7 @@ namespace PustakBhandar.Migrations
                     b.HasIndex("UserId")
                         .IsUnique();
 
-                    b.ToTable("Cart");
+                    b.ToTable("Carts");
                 });
 
             modelBuilder.Entity("PustakBhandar.Models.CartItem", b =>

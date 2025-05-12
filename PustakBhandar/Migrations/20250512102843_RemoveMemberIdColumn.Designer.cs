@@ -12,8 +12,8 @@ using PustakBhandar.Data;
 namespace PustakBhandar.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250512045825_AddRelatedEntities")]
-    partial class AddRelatedEntities
+    [Migration("20250512102843_RemoveMemberIdColumn")]
+    partial class RemoveMemberIdColumn
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -157,6 +157,51 @@ namespace PustakBhandar.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("PustakBhandar.Models.Announcement", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("text");
+
+                    b.Property<string>("AdminId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime>("EndDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Message")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("StartDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AdminId");
+
+                    b.ToTable("Announcements");
+                });
+
             modelBuilder.Entity("PustakBhandar.Models.ApplicationUser", b =>
                 {
                     b.Property<string>("Id")
@@ -251,19 +296,10 @@ namespace PustakBhandar.Migrations
                     b.Property<string>("Id")
                         .HasColumnType("text");
 
-                    b.Property<string>("Bio")
-                        .HasColumnType("text");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
 
@@ -278,6 +314,10 @@ namespace PustakBhandar.Migrations
                     b.Property<string>("AuthorId")
                         .IsRequired()
                         .HasColumnType("text");
+
+                    b.Property<string>("CoverImageUrl")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
@@ -323,6 +363,9 @@ namespace PustakBhandar.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("character varying(200)");
 
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
                     b.HasKey("Id");
 
                     b.HasIndex("AuthorId");
@@ -359,7 +402,7 @@ namespace PustakBhandar.Migrations
                     b.HasIndex("UserId")
                         .IsUnique();
 
-                    b.ToTable("Cart");
+                    b.ToTable("Carts");
                 });
 
             modelBuilder.Entity("PustakBhandar.Models.CartItem", b =>
@@ -444,16 +487,10 @@ namespace PustakBhandar.Migrations
                     b.Property<string>("Id")
                         .HasColumnType("text");
 
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
 
@@ -488,7 +525,7 @@ namespace PustakBhandar.Migrations
 
                     b.HasIndex("MemberId");
 
-                    b.ToTable("MemberDiscount");
+                    b.ToTable("MemberDiscounts");
                 });
 
             modelBuilder.Entity("PustakBhandar.Models.Notification", b =>
@@ -576,7 +613,7 @@ namespace PustakBhandar.Migrations
 
                     b.HasIndex("ProcessedByStaffId");
 
-                    b.ToTable("Order");
+                    b.ToTable("Orders");
                 });
 
             modelBuilder.Entity("PustakBhandar.Models.OrderItem", b =>
@@ -607,7 +644,7 @@ namespace PustakBhandar.Migrations
 
                     b.HasIndex("OrderId");
 
-                    b.ToTable("OrderItem");
+                    b.ToTable("OrderItems");
                 });
 
             modelBuilder.Entity("PustakBhandar.Models.Publisher", b =>
@@ -615,19 +652,10 @@ namespace PustakBhandar.Migrations
                     b.Property<string>("Id")
                         .HasColumnType("text");
 
-                    b.Property<string>("Address")
-                        .HasColumnType("text");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
 
@@ -728,7 +756,7 @@ namespace PustakBhandar.Migrations
                     b.HasIndex("UserId")
                         .IsUnique();
 
-                    b.ToTable("Wishlist");
+                    b.ToTable("Wishlists");
                 });
 
             modelBuilder.Entity("PustakBhandar.Models.Admin", b =>
@@ -810,6 +838,17 @@ namespace PustakBhandar.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("PustakBhandar.Models.Announcement", b =>
+                {
+                    b.HasOne("PustakBhandar.Models.Admin", "Admin")
+                        .WithMany()
+                        .HasForeignKey("AdminId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Admin");
                 });
 
             modelBuilder.Entity("PustakBhandar.Models.Book", b =>

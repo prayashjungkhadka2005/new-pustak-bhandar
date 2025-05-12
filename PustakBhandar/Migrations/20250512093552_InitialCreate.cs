@@ -7,7 +7,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace PustakBhandar.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialAuthSetup : Migration
+    public partial class InitialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -32,6 +32,8 @@ namespace PustakBhandar.Migrations
                 {
                     Id = table.Column<string>(type: "text", nullable: false),
                     FullName = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                    RefreshToken = table.Column<string>(type: "text", nullable: false),
+                    RefreshTokenExpiryTime = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     Discriminator = table.Column<string>(type: "character varying(21)", maxLength: 21, nullable: false),
                     JoinDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
@@ -58,47 +60,39 @@ namespace PustakBhandar.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Author",
+                name: "Authors",
                 columns: table => new
                 {
                     Id = table.Column<string>(type: "text", nullable: false),
-                    Name = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
-                    Bio = table.Column<string>(type: "text", nullable: true),
-                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
+                    Name = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Author", x => x.Id);
+                    table.PrimaryKey("PK_Authors", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
-                name: "Genre",
+                name: "Genres",
                 columns: table => new
                 {
                     Id = table.Column<string>(type: "text", nullable: false),
-                    Name = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
+                    Name = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Genre", x => x.Id);
+                    table.PrimaryKey("PK_Genres", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
-                name: "Publisher",
+                name: "Publishers",
                 columns: table => new
                 {
                     Id = table.Column<string>(type: "text", nullable: false),
-                    Name = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
-                    Address = table.Column<string>(type: "text", nullable: true),
-                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
+                    Name = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Publisher", x => x.Id);
+                    table.PrimaryKey("PK_Publishers", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -118,6 +112,32 @@ namespace PustakBhandar.Migrations
                         name: "FK_AspNetRoleClaims_AspNetRoles_RoleId",
                         column: x => x.RoleId,
                         principalTable: "AspNetRoles",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Announcements",
+                columns: table => new
+                {
+                    Id = table.Column<string>(type: "text", nullable: false),
+                    AdminId = table.Column<string>(type: "text", nullable: false),
+                    Title = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
+                    Message = table.Column<string>(type: "text", nullable: false),
+                    Type = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
+                    StartDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    EndDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    IsActive = table.Column<bool>(type: "boolean", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Announcements", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Announcements_AspNetUsers_AdminId",
+                        column: x => x.AdminId,
+                        principalTable: "AspNetUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -208,7 +228,28 @@ namespace PustakBhandar.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Discount",
+                name: "Carts",
+                columns: table => new
+                {
+                    Id = table.Column<string>(type: "text", nullable: false),
+                    UserId = table.Column<string>(type: "text", nullable: false),
+                    TotalAmount = table.Column<decimal>(type: "numeric(10,2)", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Carts", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Carts_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Discounts",
                 columns: table => new
                 {
                     Id = table.Column<string>(type: "text", nullable: false),
@@ -223,9 +264,9 @@ namespace PustakBhandar.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Discount", x => x.Id);
+                    table.PrimaryKey("PK_Discounts", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Discount_AspNetUsers_AdminId",
+                        name: "FK_Discounts_AspNetUsers_AdminId",
                         column: x => x.AdminId,
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
@@ -233,7 +274,7 @@ namespace PustakBhandar.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Order",
+                name: "Orders",
                 columns: table => new
                 {
                     Id = table.Column<string>(type: "text", nullable: false),
@@ -243,19 +284,25 @@ namespace PustakBhandar.Migrations
                     DiscountApplied = table.Column<decimal>(type: "numeric(10,2)", nullable: false),
                     ClaimCode = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
                     Status = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
-                    ProcessedByStaffId = table.Column<string>(type: "text", nullable: true)
+                    ProcessedByStaffId = table.Column<string>(type: "text", nullable: true),
+                    AdminId = table.Column<string>(type: "text", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Order", x => x.Id);
+                    table.PrimaryKey("PK_Orders", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Order_AspNetUsers_MemberId",
+                        name: "FK_Orders_AspNetUsers_AdminId",
+                        column: x => x.AdminId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_Orders_AspNetUsers_MemberId",
                         column: x => x.MemberId,
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_Order_AspNetUsers_ProcessedByStaffId",
+                        name: "FK_Orders_AspNetUsers_ProcessedByStaffId",
                         column: x => x.ProcessedByStaffId,
                         principalTable: "AspNetUsers",
                         principalColumn: "Id");
@@ -289,6 +336,7 @@ namespace PustakBhandar.Migrations
                     Id = table.Column<string>(type: "text", nullable: false),
                     Title = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
                     ISBN = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false),
+                    CoverImageUrl = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
                     AuthorId = table.Column<string>(type: "text", nullable: false),
                     GenreId = table.Column<string>(type: "text", nullable: false),
                     PublisherId = table.Column<string>(type: "text", nullable: false),
@@ -297,6 +345,7 @@ namespace PustakBhandar.Migrations
                     PublicationDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     Quantity = table.Column<int>(type: "integer", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     Rating = table.Column<decimal>(type: "numeric(2,1)", nullable: false),
                     OnSale = table.Column<bool>(type: "boolean", nullable: false),
                     DiscountId = table.Column<string>(type: "text", nullable: true)
@@ -305,32 +354,33 @@ namespace PustakBhandar.Migrations
                 {
                     table.PrimaryKey("PK_Books", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Books_Author_AuthorId",
+                        name: "FK_Books_Authors_AuthorId",
                         column: x => x.AuthorId,
-                        principalTable: "Author",
+                        principalTable: "Authors",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "FK_Books_Discount_DiscountId",
+                        name: "FK_Books_Discounts_DiscountId",
                         column: x => x.DiscountId,
-                        principalTable: "Discount",
-                        principalColumn: "Id");
+                        principalTable: "Discounts",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.SetNull);
                     table.ForeignKey(
-                        name: "FK_Books_Genre_GenreId",
+                        name: "FK_Books_Genres_GenreId",
                         column: x => x.GenreId,
-                        principalTable: "Genre",
+                        principalTable: "Genres",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "FK_Books_Publisher_PublisherId",
+                        name: "FK_Books_Publishers_PublisherId",
                         column: x => x.PublisherId,
-                        principalTable: "Publisher",
+                        principalTable: "Publishers",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
-                name: "MemberDiscount",
+                name: "MemberDiscounts",
                 columns: table => new
                 {
                     Id = table.Column<string>(type: "text", nullable: false),
@@ -342,17 +392,57 @@ namespace PustakBhandar.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_MemberDiscount", x => x.Id);
+                    table.PrimaryKey("PK_MemberDiscounts", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_MemberDiscount_AspNetUsers_MemberId",
+                        name: "FK_MemberDiscounts_AspNetUsers_MemberId",
                         column: x => x.MemberId,
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_MemberDiscount_Discount_DiscountId",
+                        name: "FK_MemberDiscounts_Discounts_DiscountId",
                         column: x => x.DiscountId,
-                        principalTable: "Discount",
+                        principalTable: "Discounts",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Notification",
+                columns: table => new
+                {
+                    Id = table.Column<string>(type: "text", nullable: false),
+                    MemberId = table.Column<string>(type: "text", nullable: false),
+                    OrderId = table.Column<string>(type: "text", nullable: false),
+                    Message = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
+                    Timestamp = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    IsRead = table.Column<bool>(type: "boolean", nullable: false),
+                    AdminId = table.Column<string>(type: "text", nullable: true),
+                    StaffId = table.Column<string>(type: "text", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Notification", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Notification_AspNetUsers_AdminId",
+                        column: x => x.AdminId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_Notification_AspNetUsers_MemberId",
+                        column: x => x.MemberId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Notification_AspNetUsers_StaffId",
+                        column: x => x.StaffId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_Notification_Orders_OrderId",
+                        column: x => x.OrderId,
+                        principalTable: "Orders",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -362,10 +452,13 @@ namespace PustakBhandar.Migrations
                 columns: table => new
                 {
                     Id = table.Column<string>(type: "text", nullable: false),
-                    MemberId = table.Column<string>(type: "text", nullable: false),
+                    CartId = table.Column<string>(type: "text", nullable: false),
                     BookId = table.Column<string>(type: "text", nullable: false),
                     Quantity = table.Column<int>(type: "integer", nullable: false),
-                    AddedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                    Price = table.Column<decimal>(type: "numeric(10,2)", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    MemberId = table.Column<string>(type: "text", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -374,18 +467,23 @@ namespace PustakBhandar.Migrations
                         name: "FK_CartItems_AspNetUsers_MemberId",
                         column: x => x.MemberId,
                         principalTable: "AspNetUsers",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_CartItems_Books_BookId",
                         column: x => x.BookId,
                         principalTable: "Books",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_CartItems_Carts_CartId",
+                        column: x => x.CartId,
+                        principalTable: "Carts",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
-                name: "OrderItem",
+                name: "OrderItems",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
@@ -397,17 +495,17 @@ namespace PustakBhandar.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_OrderItem", x => x.Id);
+                    table.PrimaryKey("PK_OrderItems", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_OrderItem_Books_BookId",
+                        name: "FK_OrderItems_Books_BookId",
                         column: x => x.BookId,
                         principalTable: "Books",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_OrderItem_Order_OrderId",
+                        name: "FK_OrderItems_Orders_OrderId",
                         column: x => x.OrderId,
-                        principalTable: "Order",
+                        principalTable: "Orders",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -421,17 +519,29 @@ namespace PustakBhandar.Migrations
                     MemberId = table.Column<string>(type: "text", nullable: false),
                     Rating = table.Column<int>(type: "integer", nullable: false),
                     Comment = table.Column<string>(type: "text", nullable: true),
-                    ReviewDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                    ReviewDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    AdminId = table.Column<string>(type: "text", nullable: true),
+                    StaffId = table.Column<string>(type: "text", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Review", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Review_AspNetUsers_AdminId",
+                        column: x => x.AdminId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_Review_AspNetUsers_MemberId",
                         column: x => x.MemberId,
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Review_AspNetUsers_StaffId",
+                        column: x => x.StaffId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_Review_Books_BookId",
                         column: x => x.BookId,
@@ -441,30 +551,41 @@ namespace PustakBhandar.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Wishlist",
+                name: "Wishlists",
                 columns: table => new
                 {
                     Id = table.Column<string>(type: "text", nullable: false),
-                    MemberId = table.Column<string>(type: "text", nullable: false),
+                    UserId = table.Column<string>(type: "text", nullable: false),
                     BookId = table.Column<string>(type: "text", nullable: false),
-                    AddedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                    AddedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    MemberId = table.Column<string>(type: "text", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Wishlist", x => x.Id);
+                    table.PrimaryKey("PK_Wishlists", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Wishlist_AspNetUsers_MemberId",
+                        name: "FK_Wishlists_AspNetUsers_MemberId",
                         column: x => x.MemberId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_Wishlists_AspNetUsers_UserId",
+                        column: x => x.UserId,
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_Wishlist_Books_BookId",
+                        name: "FK_Wishlists_Books_BookId",
                         column: x => x.BookId,
                         principalTable: "Books",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Announcements_AdminId",
+                table: "Announcements",
+                column: "AdminId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetRoleClaims_RoleId",
@@ -529,44 +650,85 @@ namespace PustakBhandar.Migrations
                 column: "BookId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_CartItems_CartId",
+                table: "CartItems",
+                column: "CartId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_CartItems_MemberId",
                 table: "CartItems",
                 column: "MemberId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Discount_AdminId",
-                table: "Discount",
+                name: "IX_Carts_UserId",
+                table: "Carts",
+                column: "UserId",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Discounts_AdminId",
+                table: "Discounts",
                 column: "AdminId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_MemberDiscount_DiscountId",
-                table: "MemberDiscount",
+                name: "IX_MemberDiscounts_DiscountId",
+                table: "MemberDiscounts",
                 column: "DiscountId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_MemberDiscount_MemberId",
-                table: "MemberDiscount",
+                name: "IX_MemberDiscounts_MemberId",
+                table: "MemberDiscounts",
                 column: "MemberId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Order_MemberId",
-                table: "Order",
+                name: "IX_Notification_AdminId",
+                table: "Notification",
+                column: "AdminId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Notification_MemberId",
+                table: "Notification",
                 column: "MemberId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Order_ProcessedByStaffId",
-                table: "Order",
-                column: "ProcessedByStaffId");
+                name: "IX_Notification_OrderId",
+                table: "Notification",
+                column: "OrderId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_OrderItem_BookId",
-                table: "OrderItem",
+                name: "IX_Notification_StaffId",
+                table: "Notification",
+                column: "StaffId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_OrderItems_BookId",
+                table: "OrderItems",
                 column: "BookId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_OrderItem_OrderId",
-                table: "OrderItem",
+                name: "IX_OrderItems_OrderId",
+                table: "OrderItems",
                 column: "OrderId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Orders_AdminId",
+                table: "Orders",
+                column: "AdminId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Orders_MemberId",
+                table: "Orders",
+                column: "MemberId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Orders_ProcessedByStaffId",
+                table: "Orders",
+                column: "ProcessedByStaffId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Review_AdminId",
+                table: "Review",
+                column: "AdminId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Review_BookId",
@@ -579,24 +741,38 @@ namespace PustakBhandar.Migrations
                 column: "MemberId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Review_StaffId",
+                table: "Review",
+                column: "StaffId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Sessions_UserId",
                 table: "Sessions",
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Wishlist_BookId",
-                table: "Wishlist",
+                name: "IX_Wishlists_BookId",
+                table: "Wishlists",
                 column: "BookId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Wishlist_MemberId",
-                table: "Wishlist",
+                name: "IX_Wishlists_MemberId",
+                table: "Wishlists",
                 column: "MemberId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Wishlists_UserId",
+                table: "Wishlists",
+                column: "UserId",
+                unique: true);
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropTable(
+                name: "Announcements");
+
             migrationBuilder.DropTable(
                 name: "AspNetRoleClaims");
 
@@ -616,10 +792,13 @@ namespace PustakBhandar.Migrations
                 name: "CartItems");
 
             migrationBuilder.DropTable(
-                name: "MemberDiscount");
+                name: "MemberDiscounts");
 
             migrationBuilder.DropTable(
-                name: "OrderItem");
+                name: "Notification");
+
+            migrationBuilder.DropTable(
+                name: "OrderItems");
 
             migrationBuilder.DropTable(
                 name: "Review");
@@ -628,28 +807,31 @@ namespace PustakBhandar.Migrations
                 name: "Sessions");
 
             migrationBuilder.DropTable(
-                name: "Wishlist");
+                name: "Wishlists");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");
 
             migrationBuilder.DropTable(
-                name: "Order");
+                name: "Carts");
+
+            migrationBuilder.DropTable(
+                name: "Orders");
 
             migrationBuilder.DropTable(
                 name: "Books");
 
             migrationBuilder.DropTable(
-                name: "Author");
+                name: "Authors");
 
             migrationBuilder.DropTable(
-                name: "Discount");
+                name: "Discounts");
 
             migrationBuilder.DropTable(
-                name: "Genre");
+                name: "Genres");
 
             migrationBuilder.DropTable(
-                name: "Publisher");
+                name: "Publishers");
 
             migrationBuilder.DropTable(
                 name: "AspNetUsers");

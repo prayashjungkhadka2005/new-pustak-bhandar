@@ -399,7 +399,7 @@ namespace PustakBhandar.Migrations
                     b.HasIndex("UserId")
                         .IsUnique();
 
-                    b.ToTable("Cart");
+                    b.ToTable("Carts");
                 });
 
             modelBuilder.Entity("PustakBhandar.Models.CartItem", b =>

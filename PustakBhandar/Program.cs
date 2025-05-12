@@ -62,6 +62,7 @@ builder.Services.AddAuthentication(options =>
 builder.Services.AddScoped<JwtService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<DatabaseSeeder>();
+builder.Services.AddScoped<DbSeeder>();
 
 // Configure Swagger
 builder.Services.AddEndpointsApiExplorer();
@@ -152,17 +153,8 @@ using (var scope = app.Services.CreateScope())
 // Seed the database
 using (var scope = app.Services.CreateScope())
 {
-    var services = scope.ServiceProvider;
-    try
-    {
-        var seeder = services.GetRequiredService<DatabaseSeeder>();
-        await seeder.SeedRolesAsync();
-    }
-    catch (Exception ex)
-    {
-        var logger = services.GetRequiredService<ILogger<Program>>();
-        logger.LogError(ex, "An error occurred while seeding the database.");
-    }
+    var seeder = scope.ServiceProvider.GetRequiredService<DbSeeder>();
+    await seeder.SeedAsync();
 }
 
 app.Run();

@@ -35,7 +35,6 @@ namespace PustakBhandar.Models
 
         // Member-specific collections
         public virtual ICollection<Wishlist>? WishlistEntries { get; set; } = new List<Wishlist>();
-        public virtual ICollection<CartItem>? CartItems { get; set; } = new List<CartItem>();
     }
 
     public class Admin : ApplicationUser
