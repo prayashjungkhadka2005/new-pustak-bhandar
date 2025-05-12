@@ -122,4 +122,17 @@ namespace PustakBhandar.DTOs
         public string Name { get; set; } = string.Empty;
         public string Description { get; set; } = string.Empty;
     }
+
+    public class MemberProfileResponse
+    {
+        public string Id { get; set; } = string.Empty;
+        public string Email { get; set; } = string.Empty;
+        public string FullName { get; set; } = string.Empty;
+        public string? PhoneNumber { get; set; }
+        public DateTime JoinDate { get; set; }
+        public int TotalOrders { get; set; }
+        public decimal DiscountEarned { get; set; }
+        public bool IsActive { get; set; }
+        public DateTime CreatedAt { get; set; }
+    }
 } 

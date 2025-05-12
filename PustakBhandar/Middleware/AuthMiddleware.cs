@@ -37,11 +37,11 @@ namespace PustakBhandar.Middleware
                     return;
                 }
 
-                // Check if the endpoint requires admin role
+                // Check if the endpoint requires authentication
                 var endpoint = context.GetEndpoint();
-                var requiresAdmin = endpoint?.Metadata.GetMetadata<Microsoft.AspNetCore.Authorization.AuthorizeAttribute>()?.Roles?.Contains("Admin") ?? false;
-
-                if (requiresAdmin)
+                var authorizeAttribute = endpoint?.Metadata.GetMetadata<Microsoft.AspNetCore.Authorization.AuthorizeAttribute>();
+                
+                if (authorizeAttribute != null)
                 {
                     var authHeader = context.Request.Headers["Authorization"].ToString();
                     _logger.LogInformation($"Auth header: {authHeader}");
@@ -66,10 +66,6 @@ namespace PustakBhandar.Middleware
                         var tokenHandler = new JwtSecurityTokenHandler();
                         var key = Encoding.UTF8.GetBytes(_configuration["Jwt:Key"] ?? throw new InvalidOperationException("JWT Key not found"));
                         
-                        _logger.LogInformation($"JWT Key: {_configuration["Jwt:Key"]}");
-                        _logger.LogInformation($"JWT Issuer: {_configuration["Jwt:Issuer"]}");
-                        _logger.LogInformation($"JWT Audience: {_configuration["Jwt:Audience"]}");
-
                         var validationParameters = new TokenValidationParameters
                         {
                             ValidateIssuerSigningKey = true,
@@ -88,27 +84,29 @@ namespace PustakBhandar.Middleware
                         var jwtToken = (JwtSecurityToken)validatedToken;
                         _logger.LogInformation($"Token claims: {JsonSerializer.Serialize(jwtToken.Claims.Select(c => new { c.Type, c.Value }))}");
 
-                        // Check for role claim using the correct claim type
+                        // Check for role claim
                         var userRole = jwtToken.Claims
                             .FirstOrDefault(x => x.Type == "http://schemas.microsoft.com/ws/2008/06/identity/claims/role")?.Value;
 
                         _logger.LogInformation($"User role from token: {userRole}");
 
-                        if (string.IsNullOrEmpty(userRole) || userRole != "Admin")
+                        // If specific role is required, check it
+                        if (!string.IsNullOrEmpty(authorizeAttribute.Roles))
                         {
-                            _logger.LogWarning($"Unauthorized access attempt. User role: {userRole}");
-                            await SendResponse(context, HttpStatusCode.Forbidden, new
+                            var requiredRoles = authorizeAttribute.Roles.Split(',');
+                            if (string.IsNullOrEmpty(userRole) || !requiredRoles.Contains(userRole))
                             {
-                                status = 403,
-                                message = "Access denied. Admin privileges required.",
-                                error = "Forbidden",
-                                details = $"User role '{userRole}' is not authorized"
-                            });
-                            return;
+                                _logger.LogWarning($"Unauthorized access attempt. User role: {userRole}, Required roles: {authorizeAttribute.Roles}");
+                                await SendResponse(context, HttpStatusCode.Forbidden, new
+                                {
+                                    status = 403,
+                                    message = "Access denied. Insufficient privileges.",
+                                    error = "Forbidden",
+                                    details = $"User role '{userRole}' is not authorized for this endpoint"
+                                });
+                                return;
+                            }
                         }
-
-                        // If we get here, the user is an admin
-                        _logger.LogInformation("Admin access granted");
                     }
                     catch (SecurityTokenExpiredException ex)
                     {

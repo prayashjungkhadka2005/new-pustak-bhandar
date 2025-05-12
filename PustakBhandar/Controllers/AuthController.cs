@@ -311,10 +311,10 @@ namespace PustakBhandar.Controllers
                 }
 
                 var user = await _userManager.FindByEmailAsync(model.Email);
-                if (user == null)
-                {
-                    return Unauthorized("Invalid email or password");
-                }
+            if (user == null)
+            {
+                return Unauthorized("Invalid email or password");
+            }
 
                 if (!user.EmailConfirmed)
                 {
@@ -323,9 +323,9 @@ namespace PustakBhandar.Controllers
 
                 var result = await _signInManager.CheckPasswordSignInAsync(user, model.Password, false);
                 if (!result.Succeeded)
-                {
-                    return Unauthorized("Invalid email or password");
-                }
+            {
+                return Unauthorized("Invalid email or password");
+            }
 
                 var token = await _jwtService.GenerateJwtToken(user);
                 var refreshToken = GenerateRefreshToken();
@@ -339,10 +339,10 @@ namespace PustakBhandar.Controllers
                 var permissions = await GetPermissionsForRoles(roles);
 
                 return Ok(new AuthResponse
-                {
-                    Token = token,
-                    UserId = user.Id,
-                    Email = user.Email,
+            {
+                Token = token,
+                UserId = user.Id,
+                Email = user.Email,
                     FullName = user.FullName,
                     TokenExpiration = DateTime.UtcNow.AddDays(1),
                     Permissions = permissions,
@@ -476,18 +476,18 @@ namespace PustakBhandar.Controllers
         public async Task<ActionResult<UserProfileResponse>> GetCurrentUser()
         {
             try
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userId))
             {
-                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-                if (string.IsNullOrEmpty(userId))
-                {
-                    return Unauthorized();
-                }
+                return Unauthorized();
+            }
 
                 var user = await _userManager.FindByIdAsync(userId);
-                if (user == null)
-                {
-                    return NotFound("User not found");
-                }
+            if (user == null)
+            {
+                return NotFound("User not found");
+            }
 
                 var roles = await _userManager.GetRolesAsync(user);
                 return new UserProfileResponse
