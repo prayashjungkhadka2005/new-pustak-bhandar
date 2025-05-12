@@ -14,12 +14,6 @@ namespace PustakBhandar.Models
         [StringLength(100)]
         public string Name { get; set; } = string.Empty;
 
-        [Column(TypeName = "text")]
-        public string? Address { get; set; }
-
-        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-        public DateTime? UpdatedAt { get; set; }
-
         // Navigation property for Books by this Publisher
         public virtual ICollection<Book>? Books { get; set; } = new List<Book>();
     }

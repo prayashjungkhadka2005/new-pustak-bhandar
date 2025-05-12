@@ -125,6 +125,9 @@ app.UseHttpsRedirection();
 // Use CORS before authentication/authorization
 app.UseCors("AllowAll");
 
+// Add AuthMiddleware before authentication/authorization
+app.UseMiddleware<PustakBhandar.Middleware.AuthMiddleware>();
+
 app.UseAuthentication();
 app.UseAuthorization();
 
