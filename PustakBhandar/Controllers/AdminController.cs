@@ -358,5 +358,230 @@ namespace PustakBhandar.Controllers
                 });
             }
         }
+
+        [HttpGet("discounts")]
+        public async Task<ActionResult<IEnumerable<DiscountResponseDto>>> GetDiscounts()
+        {
+            try
+            {
+                var discounts = await _context.Discounts
+                    .Select(d => new DiscountResponseDto
+                    {
+                        Id = d.Id,
+                        AdminId = d.AdminId,
+                        Description = d.Description,
+                        Percentage = d.Percentage,
+                        StartDate = d.StartDate,
+                        EndDate = d.EndDate,
+                        IsActive = d.IsActive,
+                        CreatedAt = d.CreatedAt,
+                        UpdatedAt = d.UpdatedAt
+                    })
+                    .ToListAsync();
+
+                return Ok(new {
+                    status = 200,
+                    message = "Discounts retrieved successfully",
+                    data = discounts
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting discounts");
+                return StatusCode(500, new {
+                    status = 500,
+                    message = "An error occurred while getting discounts",
+                    error = ex.Message
+                });
+            }
+        }
+
+        [HttpPost("discounts")]
+        public async Task<ActionResult<DiscountResponseDto>> CreateDiscount(CreateDiscountDto createDiscountDto)
+        {
+            try
+            {
+                // Validate dates
+                if (createDiscountDto.StartDate >= createDiscountDto.EndDate)
+                {
+                    return BadRequest(new {
+                        status = 400,
+                        message = "Start date must be before end date",
+                        error = "Invalid Date Range"
+                    });
+                }
+
+                // Get the current admin's ID from the claims
+                var adminId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (string.IsNullOrEmpty(adminId))
+                {
+                    return Unauthorized(new {
+                        status = 401,
+                        message = "Admin ID not found in token",
+                        error = "Unauthorized"
+                    });
+                }
+
+                var discount = new Discount
+                {
+                    AdminId = adminId,
+                    Description = createDiscountDto.Description,
+                    Percentage = createDiscountDto.Percentage,
+                    StartDate = DateTime.SpecifyKind(createDiscountDto.StartDate, DateTimeKind.Utc),
+                    EndDate = DateTime.SpecifyKind(createDiscountDto.EndDate, DateTimeKind.Utc),
+                    IsActive = createDiscountDto.IsActive
+                };
+
+                _context.Discounts.Add(discount);
+                await _context.SaveChangesAsync();
+
+                return Ok(new {
+                    status = 201,
+                    message = "Discount created successfully",
+                    data = new DiscountResponseDto
+                    {
+                        Id = discount.Id,
+                        AdminId = discount.AdminId,
+                        Description = discount.Description,
+                        Percentage = discount.Percentage,
+                        StartDate = discount.StartDate,
+                        EndDate = discount.EndDate,
+                        IsActive = discount.IsActive,
+                        CreatedAt = discount.CreatedAt,
+                        UpdatedAt = discount.UpdatedAt
+                    }
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error creating discount");
+                return StatusCode(500, new {
+                    status = 500,
+                    message = "An error occurred while creating the discount",
+                    error = ex.Message
+                });
+            }
+        }
+
+        [HttpPut("discounts/{id}")]
+        public async Task<ActionResult<DiscountResponseDto>> UpdateDiscount(string id, UpdateDiscountDto updateDiscountDto)
+        {
+            try
+            {
+                var discount = await _context.Discounts.FindAsync(id);
+                if (discount == null)
+                    return NotFound(new {
+                        status = 404,
+                        message = "Discount not found",
+                        error = "Not Found",
+                        discountId = id
+                    });
+
+                // Validate dates if both are provided
+                if (updateDiscountDto.StartDate.HasValue && updateDiscountDto.EndDate.HasValue)
+                {
+                    if (updateDiscountDto.StartDate.Value >= updateDiscountDto.EndDate.Value)
+                    {
+                        return BadRequest(new {
+                            status = 400,
+                            message = "Start date must be before end date",
+                            error = "Invalid Date Range"
+                        });
+                    }
+                }
+                // Validate dates if only one is provided
+                else if (updateDiscountDto.StartDate.HasValue && updateDiscountDto.StartDate.Value >= discount.EndDate)
+                {
+                    return BadRequest(new {
+                        status = 400,
+                        message = "Start date must be before existing end date",
+                        error = "Invalid Date Range"
+                    });
+                }
+                else if (updateDiscountDto.EndDate.HasValue && discount.StartDate >= updateDiscountDto.EndDate.Value)
+                {
+                    return BadRequest(new {
+                        status = 400,
+                        message = "End date must be after existing start date",
+                        error = "Invalid Date Range"
+                    });
+                }
+
+                // Update properties if provided
+                if (updateDiscountDto.Description != null)
+                    discount.Description = updateDiscountDto.Description;
+                if (updateDiscountDto.Percentage.HasValue)
+                    discount.Percentage = updateDiscountDto.Percentage.Value;
+                if (updateDiscountDto.StartDate.HasValue)
+                    discount.StartDate = DateTime.SpecifyKind(updateDiscountDto.StartDate.Value, DateTimeKind.Utc);
+                if (updateDiscountDto.EndDate.HasValue)
+                    discount.EndDate = DateTime.SpecifyKind(updateDiscountDto.EndDate.Value, DateTimeKind.Utc);
+                if (updateDiscountDto.IsActive.HasValue)
+                    discount.IsActive = updateDiscountDto.IsActive.Value;
+
+                discount.UpdatedAt = DateTime.UtcNow;
+                await _context.SaveChangesAsync();
+
+                return Ok(new {
+                    status = 200,
+                    message = "Discount updated successfully",
+                    data = new DiscountResponseDto
+                    {
+                        Id = discount.Id,
+                        AdminId = discount.AdminId,
+                        Description = discount.Description,
+                        Percentage = discount.Percentage,
+                        StartDate = discount.StartDate,
+                        EndDate = discount.EndDate,
+                        IsActive = discount.IsActive,
+                        CreatedAt = discount.CreatedAt,
+                        UpdatedAt = discount.UpdatedAt
+                    }
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error updating discount");
+                return StatusCode(500, new {
+                    status = 500,
+                    message = "An error occurred while updating the discount",
+                    error = ex.Message
+                });
+            }
+        }
+
+        [HttpDelete("discounts/{id}")]
+        public async Task<IActionResult> DeleteDiscount(string id)
+        {
+            try
+            {
+                var discount = await _context.Discounts.FindAsync(id);
+                if (discount == null)
+                    return NotFound(new {
+                        status = 404,
+                        message = "Discount not found",
+                        error = "Not Found",
+                        discountId = id
+                    });
+
+                _context.Discounts.Remove(discount);
+                await _context.SaveChangesAsync();
+
+                return Ok(new {
+                    status = 200,
+                    message = "Discount deleted successfully",
+                    discountId = id
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error deleting discount");
+                return StatusCode(500, new {
+                    status = 500,
+                    message = "An error occurred while deleting the discount",
+                    error = ex.Message
+                });
+            }
+        }
     }
 } 
