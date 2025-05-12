@@ -9,9 +9,9 @@ namespace PustakBhandar.Models
         public string Id { get; set; } = Guid.NewGuid().ToString();
 
         [Required]
-        public string UserId { get; set; } = string.Empty;
-        [ForeignKey("UserId")]
-        public virtual ApplicationUser? User { get; set; }
+        public string MemberId { get; set; } = string.Empty;
+        [ForeignKey("MemberId")]
+        public virtual Member? Member { get; set; }
 
         public virtual ICollection<CartItem> Items { get; set; } = new List<CartItem>();
 

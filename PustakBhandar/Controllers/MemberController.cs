@@ -152,7 +152,7 @@ namespace PustakBhandar.Controllers
 
                 var wishlistItems = await _context.Wishlists
                     .Include(w => w.Book)
-                    .Where(w => w.UserId == userId)
+                    .Where(w => w.MemberId == userId)
                     .OrderByDescending(w => w.AddedAt)
                     .Select(w => new WishlistItemResponse
                     {
@@ -198,7 +198,7 @@ namespace PustakBhandar.Controllers
 
                 // Check if book is already in wishlist
                 var existingItem = await _context.Wishlists
-                    .FirstOrDefaultAsync(w => w.UserId == userId && w.BookId == request.BookId);
+                    .FirstOrDefaultAsync(w => w.MemberId == userId && w.BookId == request.BookId);
 
                 if (existingItem != null)
                 {
@@ -208,7 +208,7 @@ namespace PustakBhandar.Controllers
                 // Add to wishlist
                 var wishlistItem = new Wishlist
                 {
-                    UserId = userId,
+                    MemberId = userId,
                     BookId = request.BookId,
                     AddedAt = DateTime.UtcNow
                 };
@@ -248,7 +248,7 @@ namespace PustakBhandar.Controllers
                 }
 
                 var wishlistItem = await _context.Wishlists
-                    .FirstOrDefaultAsync(w => w.UserId == userId && w.BookId == bookId);
+                    .FirstOrDefaultAsync(w => w.MemberId == userId && w.BookId == bookId);
 
                 if (wishlistItem == null)
                 {
@@ -290,7 +290,7 @@ namespace PustakBhandar.Controllers
 
                 if (member.Cart == null)
                 {
-                    member.Cart = new Cart { UserId = memberId };
+                    member.Cart = new Cart { MemberId = memberId };
                     _context.Carts.Add(member.Cart);
                     await _context.SaveChangesAsync();
                 }
@@ -355,7 +355,7 @@ namespace PustakBhandar.Controllers
 
                 if (member.Cart == null)
                 {
-                    member.Cart = new Cart { UserId = memberId };
+                    member.Cart = new Cart { MemberId = memberId };
                     _context.Carts.Add(member.Cart);
                     await _context.SaveChangesAsync();
                 }
@@ -507,6 +507,156 @@ namespace PustakBhandar.Controllers
                 _logger.LogError(ex, "Error removing item from cart");
                 return StatusCode(500, new { status = 500, message = "Internal server error", error = "Internal Server Error" });
             }
+        }
+
+        [HttpPost("orders")]
+        public async Task<ActionResult<PlaceOrderResponseDto>> PlaceOrder()
+        {
+            try
+            {
+                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (string.IsNullOrEmpty(userId))
+                    return Unauthorized(new { status = 401, message = "Unauthorized" });
+
+                var member = await _userManager.FindByIdAsync(userId) as Member;
+                if (member == null)
+                    return NotFound(new { status = 404, message = "Member not found" });
+
+                var cart = await _context.Carts
+                    .Include(c => c.Items)
+                    .ThenInclude(ci => ci.Book)
+                    .FirstOrDefaultAsync(c => c.MemberId == userId);
+
+                if (cart == null || !cart.Items.Any())
+                    return BadRequest(new { status = 400, message = "Cart is empty" });
+
+                // Validate stock availability
+                foreach (var item in cart.Items)
+                {
+                    if (item.Book.Quantity < item.Quantity)
+                    {
+                        return BadRequest(new { 
+                            status = 400, 
+                            message = $"Insufficient stock for book: {item.Book.Title}. Available: {item.Book.Quantity}, Requested: {item.Quantity}" 
+                        });
+                    }
+                }
+
+                var order = new Order
+                {
+                    MemberId = member.Id,
+                    OrderDate = DateTime.UtcNow,
+                    TotalAmount = cart.TotalAmount,
+                    DiscountApplied = 0, // You can add discount logic here if needed
+                    ClaimCode = Guid.NewGuid().ToString("N").Substring(0, 8),
+                    Status = "Pending"
+                };
+
+                foreach (var item in cart.Items)
+                {
+                    // Decrease book quantity
+                    item.Book.Quantity -= item.Quantity;
+                    item.Book.UpdatedAt = DateTime.UtcNow;
+
+                    order.Items.Add(new OrderItem
+                    {
+                        BookId = item.BookId,
+                        Quantity = item.Quantity,
+                        Price = item.Price
+                    });
+                }
+
+                // Update member's total orders
+                member.TotalOrders++;
+
+                _context.Orders.Add(order);
+                _context.Carts.Remove(cart);
+                await _context.SaveChangesAsync();
+
+                var response = new PlaceOrderResponseDto
+                {
+                    Id = order.Id,
+                    OrderDate = order.OrderDate,
+                    TotalAmount = order.TotalAmount,
+                    DiscountApplied = order.DiscountApplied,
+                    Status = order.Status,
+                    ClaimCode = order.ClaimCode,
+                    Items = order.Items.Select(oi => new OrderItemResponseDto
+                    {
+                        BookId = oi.BookId,
+                        BookTitle = oi.Book?.Title ?? "Unknown",
+                        Format = oi.Book?.Format ?? "Unknown",
+                        Price = oi.Price,
+                        Quantity = oi.Quantity,
+                        Subtotal = oi.Price * oi.Quantity
+                    }).ToList()
+                };
+
+                return Ok(new { status = 200, data = response });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error placing order");
+                return StatusCode(500, new { status = 500, message = "Internal server error" });
+            }
+        }
+
+        [HttpGet("orders")]
+        public async Task<ActionResult<List<OrderHistoryItemDto>>> GetOrderHistory()
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userId))
+                return Unauthorized();
+
+            var orders = await _context.Orders
+                .Include(o => o.Items)
+                .ThenInclude(oi => oi.Book)
+                .Where(o => o.MemberId == userId)
+                .OrderByDescending(o => o.OrderDate)
+                .ToListAsync();
+
+            var response = orders.Select(o => new OrderHistoryItemDto
+            {
+                Id = o.Id,
+                OrderDate = o.OrderDate,
+                TotalAmount = o.TotalAmount,
+                DiscountApplied = o.DiscountApplied,
+                Status = o.Status,
+                ClaimCode = o.ClaimCode,
+                Items = o.Items.Select(oi => new OrderItemResponseDto
+                {
+                    BookId = oi.BookId,
+                    BookTitle = oi.Book?.Title ?? "Unknown",
+                    Format = oi.Book?.Format ?? "Unknown",
+                    Price = oi.Price,
+                    Quantity = oi.Quantity,
+                    Subtotal = oi.Price * oi.Quantity
+                }).ToList()
+            }).ToList();
+
+            return Ok(response);
+        }
+
+        [HttpGet("orders/{orderId}/claim-code")]
+        public async Task<ActionResult<ClaimCodeResponseDto>> GetClaimCode(string orderId)
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userId))
+                return Unauthorized();
+
+            var order = await _context.Orders
+                .FirstOrDefaultAsync(o => o.Id == orderId && o.MemberId == userId);
+
+            if (order == null)
+                return NotFound("Order not found.");
+
+            var response = new ClaimCodeResponseDto
+            {
+                OrderId = order.Id,
+                ClaimCode = order.ClaimCode
+            };
+
+            return Ok(response);
         }
     }
 } 

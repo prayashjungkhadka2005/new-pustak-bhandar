@@ -57,4 +57,32 @@ namespace PustakBhandar.DTOs
         [Range(1, int.MaxValue, ErrorMessage = "Quantity must be at least 1")]
         public int Quantity { get; set; }
     }
+
+    public class ClaimCodeResponseDto
+    {
+        public string OrderId { get; set; } = string.Empty;
+        public string ClaimCode { get; set; } = string.Empty;
+    }
+
+    public class OrderHistoryItemDto
+    {
+        public string Id { get; set; } = string.Empty;
+        public DateTime OrderDate { get; set; }
+        public decimal TotalAmount { get; set; }
+        public decimal DiscountApplied { get; set; }
+        public string Status { get; set; } = string.Empty;
+        public string ClaimCode { get; set; } = string.Empty;
+        public List<OrderItemResponseDto> Items { get; set; } = new List<OrderItemResponseDto>();
+    }
+
+    public class PlaceOrderResponseDto
+    {
+        public string Id { get; set; } = string.Empty;
+        public DateTime OrderDate { get; set; }
+        public decimal TotalAmount { get; set; }
+        public decimal DiscountApplied { get; set; }
+        public string Status { get; set; } = string.Empty;
+        public string ClaimCode { get; set; } = string.Empty;
+        public List<OrderItemResponseDto> Items { get; set; } = new List<OrderItemResponseDto>();
+    }
 } 

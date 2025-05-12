@@ -18,9 +18,7 @@ namespace PustakBhandar.Models
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
         // Navigation properties
-        public virtual Cart? Cart { get; set; }
         public virtual Wishlist? Wishlist { get; set; }
-        public virtual ICollection<Order> Orders { get; set; } = new List<Order>();
         public virtual ICollection<Review> Reviews { get; set; } = new List<Review>();
         public virtual ICollection<Notification> Notifications { get; set; } = new List<Notification>();
     }
@@ -32,6 +30,10 @@ namespace PustakBhandar.Models
 
         [Column(TypeName = "decimal(10, 2)")]
         public decimal DiscountEarned { get; set; }
+
+        // Navigation properties
+        public virtual Cart? Cart { get; set; }
+        public virtual ICollection<Order> Orders { get; set; } = new List<Order>();
     }
 
     public class Admin : ApplicationUser

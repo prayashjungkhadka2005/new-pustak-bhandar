@@ -19,16 +19,6 @@ namespace PustakBhandar.DTOs
         public List<OrderItemResponseDto> Items { get; set; } = new List<OrderItemResponseDto>();
     }
 
-    public class OrderItemResponseDto
-    {
-        public string BookId { get; set; } = string.Empty;
-        public string BookTitle { get; set; } = string.Empty;
-        public string Format { get; set; } = string.Empty;
-        public decimal Price { get; set; }
-        public int Quantity { get; set; }
-        public decimal Subtotal { get; set; }
-    }
-
     public class AdminMemberResponseDto
     {
         public string Id { get; set; } = string.Empty;
