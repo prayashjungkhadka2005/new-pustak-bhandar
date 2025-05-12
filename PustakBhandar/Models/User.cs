@@ -32,9 +32,6 @@ namespace PustakBhandar.Models
 
         [Column(TypeName = "decimal(10, 2)")]
         public decimal DiscountEarned { get; set; }
-
-        // Member-specific collections
-        public virtual ICollection<Wishlist>? WishlistEntries { get; set; } = new List<Wishlist>();
     }
 
     public class Admin : ApplicationUser
