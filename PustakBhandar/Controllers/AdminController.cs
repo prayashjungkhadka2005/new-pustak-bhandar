@@ -583,5 +583,189 @@ namespace PustakBhandar.Controllers
                 });
             }
         }
+
+        // Announcement Management
+        [HttpGet("announcements")]
+        [Authorize(Roles = "Admin")]
+        public async Task<ActionResult<IEnumerable<AnnouncementResponseDto>>> GetAnnouncements()
+        {
+            try
+            {
+                var announcements = await _context.Announcements
+                    .OrderByDescending(a => a.CreatedAt)
+                    .ToListAsync();
+
+                var response = announcements.Select(a => new AnnouncementResponseDto
+                {
+                    Id = a.Id,
+                    AdminId = a.AdminId,
+                    Title = a.Title,
+                    Message = a.Message,
+                    Type = a.Type,
+                    StartDate = a.StartDate,
+                    EndDate = a.EndDate,
+                    IsActive = a.IsActive,
+                    CreatedAt = a.CreatedAt,
+                    UpdatedAt = a.UpdatedAt
+                });
+
+                return Ok(new { status = 200, data = response });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving announcements");
+                return StatusCode(500, new { status = 500, message = "Internal server error" });
+            }
+        }
+
+        [HttpPost("announcements")]
+        [Authorize(Roles = "Admin")]
+        public async Task<ActionResult<AnnouncementResponseDto>> CreateAnnouncement(CreateAnnouncementDto createAnnouncementDto)
+        {
+            try
+            {
+                if (createAnnouncementDto.StartDate >= createAnnouncementDto.EndDate)
+                {
+                    return BadRequest(new { status = 400, message = "Start date must be before end date" });
+                }
+
+                var adminId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (string.IsNullOrEmpty(adminId))
+                {
+                    return Unauthorized(new { status = 401, message = "Unauthorized" });
+                }
+
+                var announcement = new Announcement
+                {
+                    AdminId = adminId,
+                    Title = createAnnouncementDto.Title,
+                    Message = createAnnouncementDto.Message,
+                    Type = createAnnouncementDto.Type,
+                    StartDate = DateTime.SpecifyKind(createAnnouncementDto.StartDate, DateTimeKind.Utc),
+                    EndDate = DateTime.SpecifyKind(createAnnouncementDto.EndDate, DateTimeKind.Utc),
+                    IsActive = createAnnouncementDto.IsActive,
+                    CreatedAt = DateTime.UtcNow
+                };
+
+                _context.Announcements.Add(announcement);
+                await _context.SaveChangesAsync();
+
+                var response = new AnnouncementResponseDto
+                {
+                    Id = announcement.Id,
+                    AdminId = announcement.AdminId,
+                    Title = announcement.Title,
+                    Message = announcement.Message,
+                    Type = announcement.Type,
+                    StartDate = announcement.StartDate,
+                    EndDate = announcement.EndDate,
+                    IsActive = announcement.IsActive,
+                    CreatedAt = announcement.CreatedAt
+                };
+
+                return CreatedAtAction(nameof(GetAnnouncements), new { id = announcement.Id }, 
+                    new { status = 201, data = response });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error creating announcement");
+                return StatusCode(500, new { status = 500, message = "Internal server error" });
+            }
+        }
+
+        [HttpPut("announcements/{id}")]
+        [Authorize(Roles = "Admin")]
+        public async Task<ActionResult<AnnouncementResponseDto>> UpdateAnnouncement(string id, UpdateAnnouncementDto updateAnnouncementDto)
+        {
+            try
+            {
+                var announcement = await _context.Announcements.FindAsync(id);
+                if (announcement == null)
+                {
+                    return NotFound(new { status = 404, message = "Announcement not found" });
+                }
+
+                // Validate date range if both dates are provided
+                if (updateAnnouncementDto.StartDate.HasValue && updateAnnouncementDto.EndDate.HasValue)
+                {
+                    if (updateAnnouncementDto.StartDate.Value >= updateAnnouncementDto.EndDate.Value)
+                    {
+                        return BadRequest(new { status = 400, message = "Start date must be before end date" });
+                    }
+                }
+                // Validate date range if only one date is provided
+                else if (updateAnnouncementDto.StartDate.HasValue && updateAnnouncementDto.StartDate.Value >= announcement.EndDate)
+                {
+                    return BadRequest(new { status = 400, message = "Start date must be before end date" });
+                }
+                else if (updateAnnouncementDto.EndDate.HasValue && announcement.StartDate >= updateAnnouncementDto.EndDate.Value)
+                {
+                    return BadRequest(new { status = 400, message = "Start date must be before end date" });
+                }
+
+                // Update only provided fields
+                if (updateAnnouncementDto.Title != null)
+                    announcement.Title = updateAnnouncementDto.Title;
+                if (updateAnnouncementDto.Message != null)
+                    announcement.Message = updateAnnouncementDto.Message;
+                if (updateAnnouncementDto.Type != null)
+                    announcement.Type = updateAnnouncementDto.Type;
+                if (updateAnnouncementDto.StartDate.HasValue)
+                    announcement.StartDate = DateTime.SpecifyKind(updateAnnouncementDto.StartDate.Value, DateTimeKind.Utc);
+                if (updateAnnouncementDto.EndDate.HasValue)
+                    announcement.EndDate = DateTime.SpecifyKind(updateAnnouncementDto.EndDate.Value, DateTimeKind.Utc);
+                if (updateAnnouncementDto.IsActive.HasValue)
+                    announcement.IsActive = updateAnnouncementDto.IsActive.Value;
+
+                announcement.UpdatedAt = DateTime.UtcNow;
+
+                await _context.SaveChangesAsync();
+
+                var response = new AnnouncementResponseDto
+                {
+                    Id = announcement.Id,
+                    AdminId = announcement.AdminId,
+                    Title = announcement.Title,
+                    Message = announcement.Message,
+                    Type = announcement.Type,
+                    StartDate = announcement.StartDate,
+                    EndDate = announcement.EndDate,
+                    IsActive = announcement.IsActive,
+                    CreatedAt = announcement.CreatedAt,
+                    UpdatedAt = announcement.UpdatedAt
+                };
+
+                return Ok(new { status = 200, data = response });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error updating announcement");
+                return StatusCode(500, new { status = 500, message = "Internal server error" });
+            }
+        }
+
+        [HttpDelete("announcements/{id}")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> DeleteAnnouncement(string id)
+        {
+            try
+            {
+                var announcement = await _context.Announcements.FindAsync(id);
+                if (announcement == null)
+                {
+                    return NotFound(new { status = 404, message = "Announcement not found" });
+                }
+
+                _context.Announcements.Remove(announcement);
+                await _context.SaveChangesAsync();
+
+                return Ok(new { status = 200, message = "Announcement deleted successfully", data = new { id = announcement.Id } });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error deleting announcement");
+                return StatusCode(500, new { status = 500, message = "Internal server error" });
+            }
+        }
     }
 } 

@@ -19,6 +19,8 @@ namespace PustakBhandar.Data
         public DbSet<Genre> Genres { get; set; }
         public DbSet<Publisher> Publishers { get; set; }
         public DbSet<Discount> Discounts { get; set; }
+        public DbSet<MemberDiscount> MemberDiscounts { get; set; }
+        public DbSet<Announcement> Announcements { get; set; }
         // Removed Wishlist, WishlistItem
 
         protected override void OnModelCreating(ModelBuilder builder)
