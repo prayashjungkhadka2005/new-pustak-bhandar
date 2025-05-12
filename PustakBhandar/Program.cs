@@ -43,20 +43,20 @@ builder.Services.AddAuthentication(options =>
     options.DefaultAuthenticateScheme = "Bearer";
     options.DefaultChallengeScheme = "Bearer";
 })
-.AddJwtBearer(options =>
-{
-    options.TokenValidationParameters = new TokenValidationParameters
+    .AddJwtBearer(options =>
     {
-        ValidateIssuer = true,
-        ValidateAudience = true,
-        ValidateLifetime = true,
-        ValidateIssuerSigningKey = true,
-        ValidIssuer = builder.Configuration["Jwt:Issuer"],
-        ValidAudience = builder.Configuration["Jwt:Audience"],
-        IssuerSigningKey = new SymmetricSecurityKey(
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = builder.Configuration["Jwt:Issuer"],
+            ValidAudience = builder.Configuration["Jwt:Audience"],
+            IssuerSigningKey = new SymmetricSecurityKey(
             System.Text.Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"] ?? throw new InvalidOperationException("JWT Key not found")))
-    };
-});
+        };
+    });
 
 // Register services
 builder.Services.AddScoped<JwtService>();
@@ -102,7 +102,7 @@ builder.Services.AddCors(options =>
         builder =>
         {
             builder.AllowAnyOrigin()
-                   .AllowAnyMethod()
+            .AllowAnyMethod()
                    .AllowAnyHeader();
         });
 });

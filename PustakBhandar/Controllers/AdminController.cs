@@ -767,5 +767,176 @@ namespace PustakBhandar.Controllers
                 return StatusCode(500, new { status = 500, message = "Internal server error" });
             }
         }
+
+        // Order Management
+        [HttpGet("orders")]
+        [Authorize(Roles = "Admin")]
+        public async Task<ActionResult<IEnumerable<AdminOrderResponseDto>>> GetOrders()
+        {
+            try
+            {
+                var orders = await _context.Orders
+                    .Include(o => o.Member)
+                    .Include(o => o.ProcessedByStaff)
+                    .Include(o => o.Items)
+                        .ThenInclude(i => i.Book)
+                    .OrderByDescending(o => o.OrderDate)
+                    .ToListAsync();
+
+                var response = orders.Select(o => new AdminOrderResponseDto
+                {
+                    Id = o.Id,
+                    MemberId = o.MemberId,
+                    MemberName = o.Member.FullName,
+                    MemberEmail = o.Member.Email,
+                    ClaimCode = o.ClaimCode,
+                    TotalAmount = o.Items.Sum(i => i.Price * i.Quantity),
+                    DiscountApplied = o.DiscountApplied,
+                    Status = o.Status,
+                    OrderDate = o.OrderDate,
+                    ProcessedByStaffId = o.ProcessedByStaffId,
+                    ProcessedByStaffName = o.ProcessedByStaff?.FullName,
+                    Items = o.Items.Select(i => new OrderItemResponseDto
+                    {
+                        BookId = i.BookId,
+                        BookTitle = i.Book.Title,
+                        Format = i.Book.Format,
+                        Price = i.Price,
+                        Quantity = i.Quantity,
+                        Subtotal = i.Price * i.Quantity
+                    }).ToList()
+                });
+
+                return Ok(new { status = 200, data = response });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving orders");
+                return StatusCode(500, new { status = 500, message = "Internal server error" });
+            }
+        }
+
+        // Member Management
+        [HttpGet("members")]
+        [Authorize(Roles = "Admin")]
+        public async Task<ActionResult<IEnumerable<AdminMemberResponseDto>>> GetMembers()
+        {
+            try
+            {
+                var members = await _context.Users
+                    .Where(u => u.GetType() == typeof(Member))
+                    .OrderByDescending(m => m.CreatedAt)
+                    .ToListAsync();
+
+                var response = members.Select(m => new AdminMemberResponseDto
+                {
+                    Id = m.Id,
+                    FullName = m.FullName,
+                    Email = m.Email,
+                    PhoneNumber = m.PhoneNumber,
+                    JoinDate = ((Member)m).JoinDate,
+                    TotalOrders = ((Member)m).TotalOrders,
+                    DiscountEarned = ((Member)m).DiscountEarned,
+                    IsActive = m.EmailConfirmed,
+                    CreatedAt = m.CreatedAt
+                });
+
+                return Ok(new { status = 200, data = response });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving members");
+                return StatusCode(500, new { status = 500, message = "Internal server error" });
+            }
+        }
+
+        // Inventory Management
+        [HttpGet("inventory")]
+        [Authorize(Roles = "Admin")]
+        public async Task<ActionResult<IEnumerable<InventoryResponseDto>>> GetInventory()
+        {
+            try
+            {
+                var books = await _context.Books
+                    .Include(b => b.Author)
+                    .Include(b => b.Genre)
+                    .Include(b => b.Publisher)
+                    .OrderBy(b => b.Title)
+                    .ToListAsync();
+
+                var response = books.Select(b => new InventoryResponseDto
+                {
+                    BookId = b.Id,
+                    Title = b.Title,
+                    ISBN = b.ISBN,
+                    AuthorName = b.Author.Name,
+                    GenreName = b.Genre.Name,
+                    PublisherName = b.Publisher.Name,
+                    Format = b.Format,
+                    Price = b.Price,
+                    Quantity = b.Quantity,
+                    OnSale = b.OnSale,
+                    LastUpdated = b.UpdatedAt ?? b.CreatedAt
+                });
+
+                return Ok(new { status = 200, data = response });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving inventory");
+                return StatusCode(500, new { status = 500, message = "Internal server error" });
+            }
+        }
+
+        [HttpPut("inventory/{bookId}")]
+        [Authorize(Roles = "Admin")]
+        public async Task<ActionResult<InventoryResponseDto>> UpdateInventory(string bookId, UpdateInventoryDto updateInventoryDto)
+        {
+            try
+            {
+                var book = await _context.Books
+                    .Include(b => b.Author)
+                    .Include(b => b.Genre)
+                    .Include(b => b.Publisher)
+                    .FirstOrDefaultAsync(b => b.Id == bookId);
+
+                if (book == null)
+                {
+                    return NotFound(new { status = 404, message = "Book not found" });
+                }
+
+                // Update only provided fields
+                book.Quantity = updateInventoryDto.Quantity;
+                if (updateInventoryDto.OnSale.HasValue)
+                    book.OnSale = updateInventoryDto.OnSale.Value;
+                if (updateInventoryDto.Price.HasValue)
+                    book.Price = updateInventoryDto.Price.Value;
+                book.UpdatedAt = DateTime.UtcNow;
+
+                await _context.SaveChangesAsync();
+
+                var response = new InventoryResponseDto
+                {
+                    BookId = book.Id,
+                    Title = book.Title,
+                    ISBN = book.ISBN,
+                    AuthorName = book.Author.Name,
+                    GenreName = book.Genre.Name,
+                    PublisherName = book.Publisher.Name,
+                    Format = book.Format,
+                    Price = book.Price,
+                    Quantity = book.Quantity,
+                    OnSale = book.OnSale,
+                    LastUpdated = book.UpdatedAt ?? book.CreatedAt
+                };
+
+                return Ok(new { status = 200, data = response });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error updating inventory");
+                return StatusCode(500, new { status = 500, message = "Internal server error" });
+            }
+        }
     }
 } 

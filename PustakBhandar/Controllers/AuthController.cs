@@ -50,9 +50,9 @@ namespace PustakBhandar.Controllers
             try
             {
                 if (!ModelState.IsValid)
-            {
+                {
                     return BadRequest(ModelState);
-            }
+                }
 
                 // Validate user type
                 if (!new[] { "Admin", "Staff", "Member" }.Contains(model.UserType))
@@ -66,20 +66,49 @@ namespace PustakBhandar.Controllers
                     return BadRequest("Invalid role specified");
                 }
 
-                var user = new ApplicationUser
+                ApplicationUser user;
+                switch (model.UserType)
                 {
-                    UserName = model.Email,
-                    Email = model.Email,
-                    FullName = model.FullName,
-                    PhoneNumber = model.PhoneNumber,
-                    EmailConfirmed = false
-                };
+                    case "Member":
+                        user = new Member
+                        {
+                            UserName = model.Email,
+                            Email = model.Email,
+                            FullName = model.FullName,
+                            PhoneNumber = model.PhoneNumber,
+                            EmailConfirmed = false,
+                            JoinDate = DateTime.UtcNow
+                        };
+                        break;
+                    case "Admin":
+                        user = new Admin
+                        {
+                            UserName = model.Email,
+                            Email = model.Email,
+                            FullName = model.FullName,
+                            PhoneNumber = model.PhoneNumber,
+                            EmailConfirmed = false
+                        };
+                        break;
+                    case "Staff":
+                        user = new Staff
+                        {
+                            UserName = model.Email,
+                            Email = model.Email,
+                            FullName = model.FullName,
+                            PhoneNumber = model.PhoneNumber,
+                            EmailConfirmed = false
+                        };
+                        break;
+                    default:
+                        return BadRequest("Invalid user type");
+                }
 
                 var result = await _userManager.CreateAsync(user, model.Password);
                 if (!result.Succeeded)
                 {
                     return BadRequest(result.Errors);
-            }
+                }
 
                 // Generate email confirmation token
                 var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
@@ -282,10 +311,10 @@ namespace PustakBhandar.Controllers
                 }
 
                 var user = await _userManager.FindByEmailAsync(model.Email);
-            if (user == null)
-            {
-                return Unauthorized("Invalid email or password");
-            }
+                if (user == null)
+                {
+                    return Unauthorized("Invalid email or password");
+                }
 
                 if (!user.EmailConfirmed)
                 {
@@ -294,9 +323,9 @@ namespace PustakBhandar.Controllers
 
                 var result = await _signInManager.CheckPasswordSignInAsync(user, model.Password, false);
                 if (!result.Succeeded)
-            {
-                return Unauthorized("Invalid email or password");
-            }
+                {
+                    return Unauthorized("Invalid email or password");
+                }
 
                 var token = await _jwtService.GenerateJwtToken(user);
                 var refreshToken = GenerateRefreshToken();
@@ -310,10 +339,10 @@ namespace PustakBhandar.Controllers
                 var permissions = await GetPermissionsForRoles(roles);
 
                 return Ok(new AuthResponse
-            {
-                Token = token,
-                UserId = user.Id,
-                Email = user.Email,
+                {
+                    Token = token,
+                    UserId = user.Id,
+                    Email = user.Email,
                     FullName = user.FullName,
                     TokenExpiration = DateTime.UtcNow.AddDays(1),
                     Permissions = permissions,
@@ -447,18 +476,18 @@ namespace PustakBhandar.Controllers
         public async Task<ActionResult<UserProfileResponse>> GetCurrentUser()
         {
             try
-        {
-            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (string.IsNullOrEmpty(userId))
             {
-                return Unauthorized();
-            }
+                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (string.IsNullOrEmpty(userId))
+                {
+                    return Unauthorized();
+                }
 
                 var user = await _userManager.FindByIdAsync(userId);
-            if (user == null)
-            {
-                return NotFound("User not found");
-            }
+                if (user == null)
+                {
+                    return NotFound("User not found");
+                }
 
                 var roles = await _userManager.GetRolesAsync(user);
                 return new UserProfileResponse
@@ -551,7 +580,7 @@ namespace PustakBhandar.Controllers
 
                 var result = await _userManager.ChangePasswordAsync(user, request.CurrentPassword, request.NewPassword);
                 if (!result.Succeeded)
-        {
+                {
                     return BadRequest(result.Errors);
                 }
 

@@ -48,6 +48,7 @@ namespace PustakBhandar.Models
         public int Quantity { get; set; } // Renamed from StockQuantity for consistency with ApplicationDbContext
         
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow; // Added for consistency with ApplicationDbContext
+        public DateTime? UpdatedAt { get; set; }
 
         [Column(TypeName = "decimal(2, 1)")]
         public decimal Rating { get; set; }
