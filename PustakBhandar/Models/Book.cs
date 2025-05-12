@@ -18,6 +18,9 @@ namespace PustakBhandar.Models
         [StringLength(20)] // Standard ISBN length (ISBN-13)
         public string ISBN { get; set; } = string.Empty;
 
+        [StringLength(500)]
+        public string? CoverImageUrl { get; set; }
+
         // Foreign Keys - Assuming these IDs map to other entities
         [Required]
         public string AuthorId { get; set; } = string.Empty;

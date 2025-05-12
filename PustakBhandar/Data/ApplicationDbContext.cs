@@ -23,6 +23,7 @@ namespace PustakBhandar.Data
         public DbSet<Announcement> Announcements { get; set; }
         public DbSet<Order> Orders { get; set; }
         public DbSet<OrderItem> OrderItems { get; set; }
+        public DbSet<Wishlist> Wishlists { get; set; }
         // Removed Wishlist, WishlistItem
 
         protected override void OnModelCreating(ModelBuilder builder)

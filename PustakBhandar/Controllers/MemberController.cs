@@ -138,5 +138,133 @@ namespace PustakBhandar.Controllers
                 return StatusCode(500, new { status = 500, message = "Internal server error" });
             }
         }
+
+        [HttpGet("whitelist")]
+        public async Task<ActionResult<List<WishlistItemResponse>>> GetWishlist()
+        {
+            try
+            {
+                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (string.IsNullOrEmpty(userId))
+                {
+                    return Unauthorized(new { status = 401, message = "Unauthorized" });
+                }
+
+                var wishlistItems = await _context.Wishlists
+                    .Include(w => w.Book)
+                    .Where(w => w.UserId == userId)
+                    .OrderByDescending(w => w.AddedAt)
+                    .Select(w => new WishlistItemResponse
+                    {
+                        Id = w.Id,
+                        BookId = w.BookId,
+                        Title = w.Book.Title,
+                        Author = w.Book.Author.Name,
+                        Price = w.Book.Price,
+                        CoverImageUrl = w.Book.CoverImageUrl,
+                        AddedAt = w.AddedAt
+                    })
+                    .ToListAsync();
+
+                return Ok(new { status = 200, data = wishlistItems });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving wishlist");
+                return StatusCode(500, new { status = 500, message = "Internal server error" });
+            }
+        }
+
+        [HttpPost("whitelist")]
+        public async Task<ActionResult<WishlistItemResponse>> AddToWishlist(AddToWishlistRequest request)
+        {
+            try
+            {
+                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (string.IsNullOrEmpty(userId))
+                {
+                    return Unauthorized(new { status = 401, message = "Unauthorized" });
+                }
+
+                // Check if book exists
+                var book = await _context.Books
+                    .Include(b => b.Author)
+                    .FirstOrDefaultAsync(b => b.Id == request.BookId);
+
+                if (book == null)
+                {
+                    return NotFound(new { status = 404, message = "Book not found" });
+                }
+
+                // Check if book is already in wishlist
+                var existingItem = await _context.Wishlists
+                    .FirstOrDefaultAsync(w => w.UserId == userId && w.BookId == request.BookId);
+
+                if (existingItem != null)
+                {
+                    return BadRequest(new { status = 400, message = "Book is already in wishlist" });
+                }
+
+                // Add to wishlist
+                var wishlistItem = new Wishlist
+                {
+                    UserId = userId,
+                    BookId = request.BookId,
+                    AddedAt = DateTime.UtcNow
+                };
+
+                _context.Wishlists.Add(wishlistItem);
+                await _context.SaveChangesAsync();
+
+                var response = new WishlistItemResponse
+                {
+                    Id = wishlistItem.Id,
+                    BookId = book.Id,
+                    Title = book.Title,
+                    Author = book.Author.Name,
+                    Price = book.Price,
+                    CoverImageUrl = book.CoverImageUrl,
+                    AddedAt = wishlistItem.AddedAt
+                };
+
+                return Ok(new { status = 200, data = response });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error adding book to wishlist");
+                return StatusCode(500, new { status = 500, message = "Internal server error" });
+            }
+        }
+
+        [HttpDelete("whitelist/{bookId}")]
+        public async Task<ActionResult> RemoveFromWishlist(string bookId)
+        {
+            try
+            {
+                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (string.IsNullOrEmpty(userId))
+                {
+                    return Unauthorized(new { status = 401, message = "Unauthorized" });
+                }
+
+                var wishlistItem = await _context.Wishlists
+                    .FirstOrDefaultAsync(w => w.UserId == userId && w.BookId == bookId);
+
+                if (wishlistItem == null)
+                {
+                    return NotFound(new { status = 404, message = "Book not found in wishlist" });
+                }
+
+                _context.Wishlists.Remove(wishlistItem);
+                await _context.SaveChangesAsync();
+
+                return Ok(new { status = 200, message = "Book removed from wishlist" });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error removing book from wishlist");
+                return StatusCode(500, new { status = 500, message = "Internal server error" });
+            }
+        }
     }
 } 
