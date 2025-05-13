@@ -18,8 +18,6 @@ const navigation = [
   { name: 'Orders', href: '/admin/orders', icon: ShoppingCartIcon },
   { name: 'Members', href: '/admin/users', icon: UserGroupIcon },
   { name: 'Announcements', href: '/admin/announcements', icon: MegaphoneIcon },
-  { name: 'Reports', href: '/admin/reports', icon: ChartBarIcon },
-  { name: 'Settings', href: '/admin/settings', icon: Cog6ToothIcon },
 ];
 
 const AdminSidebar = ({ isOpen }) => {
