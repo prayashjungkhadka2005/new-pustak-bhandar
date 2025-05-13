@@ -34,6 +34,9 @@ const AddBook = () => {
   const [selectedBook, setSelectedBook] = useState(null);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [bookToDelete, setBookToDelete] = useState(null);
+  const [search, setSearch] = useState('');
+  const [filterOnSale, setFilterOnSale] = useState('all');
+  const [filterGenre, setFilterGenre] = useState('all');
 
   // Fetch books and discounts from API
   useEffect(() => {
@@ -225,6 +228,22 @@ const AddBook = () => {
     setErrors({});
   };
 
+  // Filter books before rendering
+  const filteredBooks = books.filter(book => {
+    const matchesSearch =
+      search.trim() === '' ||
+      book.title.toLowerCase().includes(search.toLowerCase()) ||
+      book.authorName.toLowerCase().includes(search.toLowerCase()) ||
+      book.isbn.toLowerCase().includes(search.toLowerCase());
+    const matchesOnSale =
+      filterOnSale === 'all' ||
+      (filterOnSale === 'on' && book.onSale) ||
+      (filterOnSale === 'off' && !book.onSale);
+    const matchesGenre =
+      filterGenre === 'all' || book.genreName === filterGenre;
+    return matchesSearch && matchesOnSale && matchesGenre;
+  });
+
   return (
     <div className="space-y-8">
       {/* Overview Title and Add Book Button */}
@@ -238,6 +257,42 @@ const AddBook = () => {
           className="bg-blue-600 text-white font-semibold px-5 py-2 rounded-lg hover:bg-blue-700 transition"
         >
           + Add Book
+        </button>
+      </div>
+
+      {/* Search and Filter Bar */}
+      <div className="flex flex-wrap gap-4 items-center mb-2">
+        <input
+          type="text"
+          placeholder="Search by title, author, or ISBN..."
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+          className="border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 border-gray-300"
+        />
+        <select
+          value={filterOnSale}
+          onChange={e => setFilterOnSale(e.target.value)}
+          className="border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 border-gray-300"
+        >
+          <option value="all">All Sale Status</option>
+          <option value="on">On Sale</option>
+          <option value="off">Not On Sale</option>
+        </select>
+        <select
+          value={filterGenre}
+          onChange={e => setFilterGenre(e.target.value)}
+          className="border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 border-gray-300"
+        >
+          <option value="all">All Genres</option>
+          {Array.from(new Set(books.map(b => b.genreName))).map(genre => (
+            <option key={genre} value={genre}>{genre}</option>
+          ))}
+        </select>
+        <button
+          className="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300 transition"
+          onClick={fetchBooks}
+        >
+          Search
         </button>
       </div>
 
@@ -262,7 +317,7 @@ const AddBook = () => {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-100">
-                {books.map((book, idx) => (
+                {filteredBooks.map((book, idx) => (
                   <React.Fragment key={book.id}>
                     <tr
                       className={
