@@ -54,20 +54,12 @@ namespace PustakBhandar.Controllers
                     })
                     .ToListAsync();
 
-                return Ok(new { 
-                    status = 200,
-                    message = "Books retrieved successfully",
-                    data = books 
-                });
+                return Ok(new { status = "success", message = "Books retrieved successfully", data = books });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error getting books");
-                return StatusCode(500, new { 
-                    status = 500,
-                    message = "An error occurred while getting books",
-                    error = ex.Message 
-                });
+                return StatusCode(500, new { status = "error", message = "An error occurred while getting books", error = ex.Message });
             }
         }
 
@@ -379,20 +371,12 @@ namespace PustakBhandar.Controllers
                     })
                     .ToListAsync();
 
-                return Ok(new {
-                    status = 200,
-                    message = "Discounts retrieved successfully",
-                    data = discounts
-                });
+                return Ok(new { status = "success", message = "Discounts retrieved successfully", data = discounts });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error getting discounts");
-                return StatusCode(500, new {
-                    status = 500,
-                    message = "An error occurred while getting discounts",
-                    error = ex.Message
-                });
+                return StatusCode(500, new { status = "error", message = "An error occurred while getting discounts", error = ex.Message });
             }
         }
 
@@ -435,31 +419,23 @@ namespace PustakBhandar.Controllers
                 _context.Discounts.Add(discount);
                 await _context.SaveChangesAsync();
 
-                return Ok(new {
-                    status = 201,
-                    message = "Discount created successfully",
-                    data = new DiscountResponseDto
-                    {
-                        Id = discount.Id,
-                        AdminId = discount.AdminId,
-                        Description = discount.Description,
-                        Percentage = discount.Percentage,
-                        StartDate = discount.StartDate,
-                        EndDate = discount.EndDate,
-                        IsActive = discount.IsActive,
-                        CreatedAt = discount.CreatedAt,
-                        UpdatedAt = discount.UpdatedAt
-                    }
-                });
+                return Ok(new { status = "success", message = "Discount created successfully", data = new DiscountResponseDto
+                {
+                    Id = discount.Id,
+                    AdminId = discount.AdminId,
+                    Description = discount.Description,
+                    Percentage = discount.Percentage,
+                    StartDate = discount.StartDate,
+                    EndDate = discount.EndDate,
+                    IsActive = discount.IsActive,
+                    CreatedAt = discount.CreatedAt,
+                    UpdatedAt = discount.UpdatedAt
+                } });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error creating discount");
-                return StatusCode(500, new {
-                    status = 500,
-                    message = "An error occurred while creating the discount",
-                    error = ex.Message
-                });
+                return StatusCode(500, new { status = "error", message = "An error occurred while creating the discount", error = ex.Message });
             }
         }
 
@@ -522,31 +498,23 @@ namespace PustakBhandar.Controllers
                 discount.UpdatedAt = DateTime.UtcNow;
                 await _context.SaveChangesAsync();
 
-                return Ok(new {
-                    status = 200,
-                    message = "Discount updated successfully",
-                    data = new DiscountResponseDto
-                    {
-                        Id = discount.Id,
-                        AdminId = discount.AdminId,
-                        Description = discount.Description,
-                        Percentage = discount.Percentage,
-                        StartDate = discount.StartDate,
-                        EndDate = discount.EndDate,
-                        IsActive = discount.IsActive,
-                        CreatedAt = discount.CreatedAt,
-                        UpdatedAt = discount.UpdatedAt
-                    }
-                });
+                return Ok(new { status = "success", message = "Discount updated successfully", data = new DiscountResponseDto
+                {
+                    Id = discount.Id,
+                    AdminId = discount.AdminId,
+                    Description = discount.Description,
+                    Percentage = discount.Percentage,
+                    StartDate = discount.StartDate,
+                    EndDate = discount.EndDate,
+                    IsActive = discount.IsActive,
+                    CreatedAt = discount.CreatedAt,
+                    UpdatedAt = discount.UpdatedAt
+                } });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error updating discount");
-                return StatusCode(500, new {
-                    status = 500,
-                    message = "An error occurred while updating the discount",
-                    error = ex.Message
-                });
+                return StatusCode(500, new { status = "error", message = "An error occurred while updating the discount", error = ex.Message });
             }
         }
 
@@ -567,20 +535,12 @@ namespace PustakBhandar.Controllers
                 _context.Discounts.Remove(discount);
                 await _context.SaveChangesAsync();
 
-                return Ok(new {
-                    status = 200,
-                    message = "Discount deleted successfully",
-                    discountId = id
-                });
+                return Ok(new { status = "success", message = "Discount deleted successfully", discountId = id });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error deleting discount");
-                return StatusCode(500, new {
-                    status = 500,
-                    message = "An error occurred while deleting the discount",
-                    error = ex.Message
-                });
+                return StatusCode(500, new { status = "error", message = "An error occurred while deleting the discount", error = ex.Message });
             }
         }
 
@@ -609,12 +569,12 @@ namespace PustakBhandar.Controllers
                     UpdatedAt = a.UpdatedAt
                 });
 
-                return Ok(new { status = 200, data = response });
+                return Ok(new { status = "success", message = "Announcements retrieved successfully", data = response });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error retrieving announcements");
-                return StatusCode(500, new { status = 500, message = "Internal server error" });
+                return StatusCode(500, new { status = "error", message = "Internal server error" });
             }
         }
 
@@ -663,13 +623,12 @@ namespace PustakBhandar.Controllers
                     CreatedAt = announcement.CreatedAt
                 };
 
-                return CreatedAtAction(nameof(GetAnnouncements), new { id = announcement.Id }, 
-                    new { status = 201, data = response });
+                return CreatedAtAction(nameof(GetAnnouncements), new { id = announcement.Id }, new { status = "success", message = "Announcement created successfully", data = response });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error creating announcement");
-                return StatusCode(500, new { status = 500, message = "Internal server error" });
+                return StatusCode(500, new { status = "error", message = "Internal server error" });
             }
         }
 
@@ -735,12 +694,12 @@ namespace PustakBhandar.Controllers
                     UpdatedAt = announcement.UpdatedAt
                 };
 
-                return Ok(new { status = 200, data = response });
+                return Ok(new { status = "success", message = "Announcement updated successfully", data = response });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error updating announcement");
-                return StatusCode(500, new { status = 500, message = "Internal server error" });
+                return StatusCode(500, new { status = "error", message = "Internal server error" });
             }
         }
 
@@ -759,12 +718,12 @@ namespace PustakBhandar.Controllers
                 _context.Announcements.Remove(announcement);
                 await _context.SaveChangesAsync();
 
-                return Ok(new { status = 200, message = "Announcement deleted successfully", data = new { id = announcement.Id } });
+                return Ok(new { status = "success", message = "Announcement deleted successfully", data = new { id = announcement.Id } });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error deleting announcement");
-                return StatusCode(500, new { status = 500, message = "Internal server error" });
+                return StatusCode(500, new { status = "error", message = "Internal server error" });
             }
         }
 

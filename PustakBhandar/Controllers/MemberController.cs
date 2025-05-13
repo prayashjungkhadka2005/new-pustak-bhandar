@@ -797,12 +797,12 @@ namespace PustakBhandar.Controllers
                     })
                     .ToListAsync();
 
-                return Ok(new { status = 200, data = notifications });
+                return Ok(new { status = "success", message = "Notifications retrieved successfully", data = notifications });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error retrieving notifications");
-                return StatusCode(500, new { status = 500, message = "Internal server error" });
+                return StatusCode(500, new { status = "error", message = "Internal server error" });
             }
         }
     }

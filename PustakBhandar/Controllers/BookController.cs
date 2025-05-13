@@ -51,7 +51,7 @@ namespace PustakBhandar.Controllers
                 })
                 .ToListAsync();
 
-            return Ok(new { status = 200, data = books });
+            return Ok(new { status = "success", message = "Books retrieved successfully", data = books });
         }
 
         // GET: /api/books/search
@@ -85,7 +85,7 @@ namespace PustakBhandar.Controllers
                 })
                 .ToListAsync();
 
-            return Ok(new { status = 200, data = books });
+            return Ok(new { status = "success", message = "Books retrieved successfully", data = books });
         }
 
         // GET: /api/books/{bookId}
@@ -121,7 +121,7 @@ namespace PustakBhandar.Controllers
                 CreatedAt = book.CreatedAt
             };
 
-            return Ok(new { status = 200, data = response });
+            return Ok(new { status = "success", message = "Book retrieved successfully", data = response });
         }
 
         // GET: /api/books/genre/{genreId}
@@ -155,7 +155,7 @@ namespace PustakBhandar.Controllers
                 })
                 .ToListAsync();
 
-            return Ok(new { status = 200, data = books });
+            return Ok(new { status = "success", message = "Books retrieved successfully", data = books });
         }
 
         // GET: /api/books/author/{authorId}
@@ -189,7 +189,7 @@ namespace PustakBhandar.Controllers
                 })
                 .ToListAsync();
 
-            return Ok(new { status = 200, data = books });
+            return Ok(new { status = "success", message = "Books retrieved successfully", data = books });
         }
 
         // GET: /api/books/publisher/{id}
@@ -223,7 +223,7 @@ namespace PustakBhandar.Controllers
                 })
                 .ToListAsync();
 
-            return Ok(new { status = 200, data = books });
+            return Ok(new { status = "success", message = "Books retrieved successfully", data = books });
         }
 
         // GET: /api/books/sort
@@ -274,7 +274,7 @@ namespace PustakBhandar.Controllers
                 })
                 .ToListAsync();
 
-            return Ok(new { status = 200, data = books });
+            return Ok(new { status = "success", message = "Books retrieved successfully", data = books });
         }
     }
 } 
