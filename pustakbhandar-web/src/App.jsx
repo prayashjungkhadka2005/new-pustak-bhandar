@@ -18,7 +18,9 @@ import DiscountPage from './pages/admin/DiscountPage';
 import AnnouncementPage from './pages/admin/AnnouncementPage';
 import OrderPage from './pages/admin/OrderPage';
 import UserManagementPage from './pages/admin/UserManagementPage';
+import MemberLayout from './pages/member/MemberLayout';
 import MemberDashboard from './pages/member/MemberDashboard';
+import OrdersPage from './pages/member/OrdersPage';
 
 function App() {
   return (
@@ -103,15 +105,20 @@ function App() {
             }
           />
 
-          {/* Protected Member Routes */}
+          {/* Protected Member Routes (nested) */}
           <Route
-            path="/member/dashboard"
+            path="/member"
             element={
               <PermissionRoute permission={Permissions.VIEW_SELF_DASHBOARD}>
-                <MemberDashboard />
+                <MemberLayout />
               </PermissionRoute>
             }
-          />
+          >
+            <Route index element={<Navigate to="dashboard" replace />} />
+            <Route path="dashboard" element={<MemberDashboard />} />
+            <Route path="orders" element={<OrdersPage />} />
+            {/* Add more member routes here */}
+          </Route>
 
           {/* Add more protected routes as needed */}
         </Routes>

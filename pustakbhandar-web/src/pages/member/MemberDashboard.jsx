@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import MemberLayout from './MemberLayout';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 
@@ -52,7 +51,7 @@ const MemberDashboard = () => {
   }, []);
 
   return (
-    <MemberLayout>
+    <>
       {/* Profile Summary */}
       <div className="bg-white rounded-xl shadow p-6 flex items-center space-x-8 mb-6">
         {loading ? (
@@ -157,7 +156,7 @@ const MemberDashboard = () => {
           <Link to="/member/notifications" className="block mt-2 text-xs text-[#3F8EFC] font-semibold hover:underline">View all notifications</Link>
         </div>
       </div>
-    </MemberLayout>
+    </>
   );
 };
 
