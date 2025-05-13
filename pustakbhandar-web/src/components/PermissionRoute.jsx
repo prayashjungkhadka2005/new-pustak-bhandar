@@ -12,8 +12,8 @@ const PermissionRoute = ({ permission, children }) => {
     return <Navigate to="/login" replace />;
   }
 
-  // Check if user has the required permission and is an admin
-  if (!hasPermission(permission) || !user?.roles?.includes('Admin')) {
+  // Only check for the required permission
+  if (!hasPermission(permission)) {
     return <Navigate to="/unauthorized" />;
   }
 

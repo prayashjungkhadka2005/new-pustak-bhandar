@@ -18,6 +18,7 @@ import DiscountPage from './pages/admin/DiscountPage';
 import AnnouncementPage from './pages/admin/AnnouncementPage';
 import OrderPage from './pages/admin/OrderPage';
 import UserManagementPage from './pages/admin/UserManagementPage';
+import MemberDashboard from './pages/member/MemberDashboard';
 
 function App() {
   return (
@@ -98,6 +99,16 @@ function App() {
             element={
               <PermissionRoute permission={Permissions.VIEW_ORDERS}>
                 <StaffDashboard />
+              </PermissionRoute>
+            }
+          />
+
+          {/* Protected Member Routes */}
+          <Route
+            path="/member/dashboard"
+            element={
+              <PermissionRoute permission={Permissions.VIEW_SELF_DASHBOARD}>
+                <MemberDashboard />
               </PermissionRoute>
             }
           />

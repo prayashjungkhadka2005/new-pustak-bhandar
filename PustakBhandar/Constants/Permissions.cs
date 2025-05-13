@@ -42,6 +42,9 @@ namespace PustakBhandar.Constants
         public const string AddReview = "add_review";
         public const string ViewReviews = "view_reviews";
 
+        // Member Dashboard
+        public const string ViewSelfDashboard = "view_self_dashboard";
+
         // Get all permissions
         public static List<string> GetAllPermissions()
         {
@@ -77,7 +80,9 @@ namespace PustakBhandar.Constants
                 ViewOrderClaimCode,
                 ApplyDiscounts,
                 AddReview,
-                ViewReviews
+                ViewReviews,
+                ViewNotifications,
+                ViewSelfDashboard
             };
         }
 
@@ -102,7 +107,8 @@ namespace PustakBhandar.Constants
                 ApplyDiscounts,
                 AddReview,
                 ViewReviews,
-                ViewNotifications
+                ViewNotifications,
+                ViewSelfDashboard
             };
         }
 

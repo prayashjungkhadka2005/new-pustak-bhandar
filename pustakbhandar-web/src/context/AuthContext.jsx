@@ -100,6 +100,8 @@ export const AuthProvider = ({ children }) => {
         navigate('/admin', { replace: true });
       } else if (data.roles.includes('Staff')) {
         navigate('/staff/dashboard', { replace: true });
+      } else if (data.roles.includes('Member')) {
+        navigate('/member/dashboard', { replace: true });
       } else {
         navigate('/');
       }

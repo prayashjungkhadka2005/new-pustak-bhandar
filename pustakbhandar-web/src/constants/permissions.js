@@ -37,5 +37,8 @@ export const Permissions = {
 
   // Member Review Management
   ADD_REVIEW: 'add_review',
-  VIEW_REVIEWS: 'view_reviews'
+  VIEW_REVIEWS: 'view_reviews',
+
+  // Member Dashboard
+  VIEW_SELF_DASHBOARD: 'view_self_dashboard'
 }; 
