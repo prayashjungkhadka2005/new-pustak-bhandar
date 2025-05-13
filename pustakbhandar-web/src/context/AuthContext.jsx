@@ -67,7 +67,16 @@ export const AuthProvider = ({ children }) => {
         body: JSON.stringify({ email, password }),
       });
 
-      const data = await response.json();
+      // First try to parse as JSON
+      let data;
+      const contentType = response.headers.get('content-type');
+      if (contentType && contentType.includes('application/json')) {
+        data = await response.json();
+      } else {
+        // If not JSON, get the text
+        const text = await response.text();
+        throw new Error(text || 'Login failed');
+      }
 
       if (!response.ok) {
         throw new Error(data.message || 'Login failed');

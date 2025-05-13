@@ -21,24 +21,32 @@ function App() {
           position="top-right"
           reverseOrder={false}
           toastOptions={{
-            duration: 2000,
+            duration: 3000,
             style: {
               fontSize: '1rem',
               borderRadius: '8px',
               background: '#fff',
               color: '#333',
               boxShadow: '0 4px 24px rgba(0,0,0,0.08)',
+              padding: '16px',
+              maxWidth: '400px',
             },
             success: {
               iconTheme: {
                 primary: '#2563eb',
                 secondary: '#fff',
               },
+              style: {
+                border: '1px solid #2563eb',
+              },
             },
             error: {
               iconTheme: {
                 primary: '#ef4444',
                 secondary: '#fff',
+              },
+              style: {
+                border: '1px solid #ef4444',
               },
             },
           }}
