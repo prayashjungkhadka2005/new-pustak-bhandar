@@ -14,16 +14,8 @@ const getGreeting = () => {
 };
 
 const AdminHeader = ({ toggleSidebar }) => {
-  const [showNotifications, setShowNotifications] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
   const { user, logout } = useAuth();
-
-  // Mock notifications - replace with real data later
-  const notifications = [
-    { id: 1, message: 'New order received', time: '5 minutes ago' },
-    { id: 2, message: 'Low stock alert for "The Great Gatsby"', time: '1 hour ago' },
-    { id: 3, message: 'New member registration', time: '2 hours ago' },
-  ];
 
   const greeting = getGreeting();
   const name = user?.fullName ? user.fullName.split(' ')[0] : '';
@@ -48,50 +40,8 @@ const AdminHeader = ({ toggleSidebar }) => {
             </div>
           </div>
 
-          {/* Right side - Notifications and Profile */}
+          {/* Right side - Profile only */}
           <div className="flex items-center space-x-4">
-            {/* Notifications */}
-            <div className="relative">
-              <button
-                type="button"
-                className="p-1 text-gray-500 hover:text-gray-600 focus:outline-none"
-                onClick={() => setShowNotifications(!showNotifications)}
-              >
-                <BellIcon className="h-6 w-6" />
-                {notifications.length > 0 && (
-                  <span className="absolute top-0 right-0 block h-2 w-2 rounded-full bg-red-500 ring-2 ring-white" />
-                )}
-              </button>
-
-              {/* Notifications dropdown */}
-              {showNotifications && (
-                <div className="absolute right-0 mt-2 w-80 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-50">
-                  <div className="py-1">
-                    <div className="px-4 py-2 border-b border-gray-100">
-                      <h3 className="text-sm font-medium text-gray-900">Notifications</h3>
-                    </div>
-                    {notifications.map((notification) => (
-                      <div
-                        key={notification.id}
-                        className="px-4 py-3 hover:bg-gray-50 cursor-pointer"
-                      >
-                        <p className="text-sm text-gray-900">{notification.message}</p>
-                        <p className="text-xs text-gray-500 mt-1">{notification.time}</p>
-                      </div>
-                    ))}
-                    <div className="px-4 py-2 border-t border-gray-100">
-                      <button
-                        type="button"
-                        className="w-full text-sm text-blue-600 hover:text-blue-500"
-                      >
-                        View all notifications
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-
             {/* Profile dropdown */}
             <div className="relative">
               <button

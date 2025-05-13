@@ -10,6 +10,7 @@ import {
   ChartBarIcon,
   Cog6ToothIcon,
 } from '@heroicons/react/24/outline';
+import { useAuth } from '../../context/AuthContext';
 
 const navigation = [
   { name: 'Dashboard', href: '/admin/dashboard', icon: HomeIcon },
@@ -21,6 +22,7 @@ const navigation = [
 ];
 
 const AdminSidebar = ({ isOpen }) => {
+  const { user } = useAuth();
   return (
     <div
       className={`fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-lg transform transition-transform duration-200 ease-in-out ${
@@ -70,11 +72,11 @@ const AdminSidebar = ({ isOpen }) => {
       <div className="absolute bottom-0 w-full p-4 border-t border-gray-200">
         <div className="flex items-center space-x-3">
           <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center">
-            <span className="text-sm font-medium text-gray-600">A</span>
+            <span className="text-sm font-medium text-gray-600">{user?.fullName?.[0] || 'A'}</span>
           </div>
           <div>
-            <p className="text-sm font-medium text-gray-900">Admin</p>
-            <p className="text-xs text-gray-500">Administrator</p>
+            <p className="text-sm font-medium text-gray-900">{user?.fullName || 'Admin'}</p>
+            <p className="text-xs text-gray-500">{user?.email || 'Administrator'}</p>
           </div>
         </div>
       </div>
