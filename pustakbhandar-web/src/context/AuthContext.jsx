@@ -1,13 +1,9 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
+import { showSuccess, showError } from '../utils/toast';
+import { Permissions } from '../constants/permissions';
 
-// Set default base URL for axios
-axios.defaults.baseURL = import.meta.env.VITE_API_BASE_URL;
-
-// Configure axios defaults
-axios.defaults.headers.common['Content-Type'] = 'application/json';
-
-const AuthContext = createContext(null);
+const AuthContext = createContext();
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
@@ -20,124 +16,119 @@ export const useAuth = () => {
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
+  const navigate = useNavigate();
+
+  // Function to get auth headers
+  const getAuthHeaders = () => {
+    const session = localStorage.getItem('userSession');
+    if (!session) return {};
+    
+    const { token } = JSON.parse(session);
+    return {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    };
+  };
+
+  // Function to check if token is expired
+  const isTokenExpired = (expirationDate) => {
+    return new Date(expirationDate) <= new Date();
+  };
 
   useEffect(() => {
-    // Check if user is logged in on mount
-    const token = localStorage.getItem('token');
-    if (token) {
-      checkAuthStatus();
-    } else {
-      setLoading(false);
+    // Check for stored session on mount
+    const storedSession = localStorage.getItem('userSession');
+    if (storedSession) {
+      try {
+        const session = JSON.parse(storedSession);
+        // Check if token is expired
+        if (!isTokenExpired(session.tokenExpiration)) {
+          setUser(session);
+        } else {
+          localStorage.removeItem('userSession');
+        }
+      } catch (error) {
+        console.error('Error parsing stored session:', error);
+        localStorage.removeItem('userSession');
+      }
     }
+    setLoading(false);
   }, []);
 
-  const checkAuthStatus = async () => {
-    try {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        setLoading(false);
-        return;
-      }
-
-      const response = await axios.get('/auth/me', {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      });
-
-      setUser(response.data);
-    } catch (error) {
-      localStorage.removeItem('token');
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const login = async (email, password) => {
+    setIsLoggingIn(true);
     try {
-      const response = await axios.post('/auth/login', {
-        email,
-        password
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/auth/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
       });
 
-      if (response.data && response.data.token) {
-        localStorage.setItem('token', response.data.token);
-        setUser({
-          userId: response.data.userId,
-          email: response.data.email,
-          fullName: response.data.fullName,
-          roles: response.data.roles,
-          permissions: response.data.permissions
-        });
-        return response.data;
-      } else {
-        throw new Error('Invalid response from server');
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Login failed');
       }
-    } catch (error) {
-      let errorMessage = 'Login failed';
+
+      if (!data || !data.roles || !Array.isArray(data.roles)) {
+        throw new Error('Invalid response format from server');
+      }
       
-      if (error.response) {
-        // The request was made and the server responded with a status code
-        // that falls out of the range of 2xx
-        if (error.response.status === 401) {
-          errorMessage = 'Invalid email or password. Please try again.';
-        } else if (error.response.status === 404) {
-          errorMessage = 'User not found. Please register first.';
-        } else {
-          errorMessage = error.response.data?.message || 'Login failed. Please try again.';
-        }
-      } else if (error.request) {
-        // The request was made but no response was received
-        errorMessage = 'No response from server. Please check your connection.';
-      } else {
-        // Something happened in setting up the request that triggered an Error
-        errorMessage = error.message;
-      }
-
-      throw new Error(errorMessage);
-    }
-  };
-
-  const register = async (userData) => {
-    try {
-      const response = await axios.post('/auth/register', userData);
-      return response.data;
-    } catch (error) {
-      let errorMessage = 'Registration failed';
+      // Store the session
+      localStorage.setItem('userSession', JSON.stringify(data));
       
-      if (error.response) {
-        if (error.response.status === 409) {
-          errorMessage = 'Email already exists. Please use a different email.';
-        } else {
-          errorMessage = error.response.data?.message || 'Registration failed. Please try again.';
-        }
-      } else if (error.request) {
-        errorMessage = 'No response from server. Please check your connection.';
+      // Update user state
+      setUser(data);
+
+      // Show success message
+      showSuccess('Login successful!');
+
+      // Redirect based on role
+      if (data.roles.includes('Admin')) {
+        navigate('/admin/dashboard', { replace: true });
       } else {
-        errorMessage = error.message;
+        navigate('/staff/dashboard', { replace: true });
       }
 
-      throw new Error(errorMessage);
+      return data;
+    } catch (error) {
+      showError(error.message);
+      throw error;
+    } finally {
+      setIsLoggingIn(false);
     }
   };
 
   const logout = () => {
-    localStorage.removeItem('token');
+    localStorage.removeItem('userSession');
     setUser(null);
+    navigate('/login', { replace: true });
+    showSuccess('Logged out successfully');
+  };
+
+  const hasPermission = (permission) => {
+    if (!user || !user.permissions) return false;
+    return user.permissions.includes(permission);
+  };
+
+  const hasRole = (role) => {
+    if (!user || !user.roles) return false;
+    return user.roles.includes(role);
   };
 
   const value = {
     user,
     loading,
+    isLoggingIn,
     login,
-    register,
     logout,
-    isAuthenticated: !!user
+    hasPermission,
+    hasRole,
+    getAuthHeaders,
   };
 
-  return (
-    <AuthContext.Provider value={value}>
-      {!loading && children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }; 

@@ -63,6 +63,7 @@ builder.Services.AddScoped<JwtService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<DatabaseSeeder>();
 builder.Services.AddScoped<DbSeeder>();
+builder.Services.AddScoped<PermissionService>();
 
 // Configure Swagger
 builder.Services.AddEndpointsApiExplorer();
@@ -155,6 +156,13 @@ using (var scope = app.Services.CreateScope())
 {
     var seeder = scope.ServiceProvider.GetRequiredService<DbSeeder>();
     await seeder.SeedAsync();
+}
+
+// Seed permissions on startup
+using (var scope = app.Services.CreateScope())
+{
+    var permissionService = scope.ServiceProvider.GetRequiredService<PermissionService>();
+    await permissionService.SeedPermissions();
 }
 
 app.Run();
