@@ -97,9 +97,11 @@ export const AuthProvider = ({ children }) => {
 
       // Redirect based on role
       if (data.roles.includes('Admin')) {
-        navigate('/admin/dashboard', { replace: true });
-      } else {
+        navigate('/admin', { replace: true });
+      } else if (data.roles.includes('Staff')) {
         navigate('/staff/dashboard', { replace: true });
+      } else {
+        navigate('/');
       }
 
       return data;

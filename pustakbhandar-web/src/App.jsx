@@ -10,8 +10,10 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
-import AdminDashboard from './pages/admin/Dashboard';
+import AdminLayout from './pages/admin/AdminLayout';
+import Dashboard from './pages/admin/Dashboard';
 import StaffDashboard from './pages/staff/Dashboard';
+import AddBook from './pages/admin/AddBook';
 
 function App() {
   return (
@@ -69,13 +71,18 @@ function App() {
 
           {/* Protected Admin Routes */}
           <Route
-            path="/admin/dashboard"
+            path="/admin"
             element={
               <PermissionRoute permission={Permissions.MANAGE_USERS}>
-                <AdminDashboard />
+                <AdminLayout />
               </PermissionRoute>
             }
-          />
+          >
+            <Route index element={<Navigate to="dashboard" replace />} />
+            <Route path="dashboard" element={<Dashboard />} />
+            <Route path="books/add" element={<AddBook />} />
+            {/* Add more admin routes here */}
+          </Route>
 
           {/* Protected Staff Routes */}
           <Route

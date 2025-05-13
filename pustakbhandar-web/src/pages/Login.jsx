@@ -29,10 +29,10 @@ const Login = () => {
       // Redirect based on role from the response
       const userRole = response?.roles?.[0] || response?.user?.roles?.[0]; // Accommodate different possible response structures
       switch (userRole) {
-        case 'admin':
+        case 'Admin':
           navigate('/admin/dashboard');
           break;
-        case 'staff':
+        case 'Staff':
           navigate('/staff/dashboard');
           break;
         default:

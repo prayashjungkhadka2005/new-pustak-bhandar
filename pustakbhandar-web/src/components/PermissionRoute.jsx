@@ -1,10 +1,14 @@
 import { Navigate } from 'react-router-dom';
-import { usePermissions } from '../hooks/usePermissions';
+import { useAuth } from '../context/AuthContext';
 
 const PermissionRoute = ({ permission, children }) => {
-  const { hasPermission } = usePermissions();
+  const { user, hasPermission, loading } = useAuth();
 
-  if (!hasPermission(permission)) {
+  // Wait for auth state to load before making a decision
+  if (loading) return null; // Or a <Loader /> component
+
+  // Check if user has the required permission and is an admin
+  if (!hasPermission(permission) || !user?.roles?.includes('Admin')) {
     return <Navigate to="/unauthorized" />;
   }
 

@@ -1,0 +1,29 @@
+{
+  "Files": [
+    {
+      "Id": "D:\\Prayash Drive\\Application Development\\PustakBhandar\\wwwroot\\uploads\\covers\\a94df9cc-3ce8-4304-86f4-5f6557b6edca.jpg",
+      "PackagePath": "staticwebassets\\uploads\\covers\\a94df9cc-3ce8-4304-86f4-5f6557b6edca.jpg"
+    },
+    {
+      "Id": "obj\\Debug\\net9.0\\staticwebassets\\msbuild.PustakBhandar.Microsoft.AspNetCore.StaticWebAssetEndpoints.props",
+      "PackagePath": "build\\Microsoft.AspNetCore.StaticWebAssetEndpoints.props"
+    },
+    {
+      "Id": "obj\\Debug\\net9.0\\staticwebassets\\msbuild.PustakBhandar.Microsoft.AspNetCore.StaticWebAssets.props",
+      "PackagePath": "build\\Microsoft.AspNetCore.StaticWebAssets.props"
+    },
+    {
+      "Id": "obj\\Debug\\net9.0\\staticwebassets\\msbuild.build.PustakBhandar.props",
+      "PackagePath": "build\\PustakBhandar.props"
+    },
+    {
+      "Id": "obj\\Debug\\net9.0\\staticwebassets\\msbuild.buildMultiTargeting.PustakBhandar.props",
+      "PackagePath": "buildMultiTargeting\\PustakBhandar.props"
+    },
+    {
+      "Id": "obj\\Debug\\net9.0\\staticwebassets\\msbuild.buildTransitive.PustakBhandar.props",
+      "PackagePath": "buildTransitive\\PustakBhandar.props"
+    }
+  ],
+  "ElementsToRemove": []
+}

@@ -181,3 +181,4 @@ D:\Prayash Drive\Application Development\PustakBhandar\bin\Debug\net9.0\Microsof
 D:\Prayash Drive\Application Development\PustakBhandar\bin\Debug\net9.0\Microsoft.AspNetCore.Identity.EntityFrameworkCore.dll
 D:\Prayash Drive\Application Development\PustakBhandar\bin\Debug\net9.0\Microsoft.Extensions.Identity.Core.dll
 D:\Prayash Drive\Application Development\PustakBhandar\bin\Debug\net9.0\Microsoft.Extensions.Identity.Stores.dll
+D:\Prayash Drive\Application Development\PustakBhandar\bin\Debug\net9.0\PustakBhandar.staticwebassets.runtime.json

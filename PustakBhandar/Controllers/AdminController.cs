@@ -50,7 +50,8 @@ namespace PustakBhandar.Controllers
                         OnSale = b.OnSale,
                         DiscountId = b.DiscountId,
                         DiscountPercentage = b.Discount != null ? b.Discount.Percentage : null,
-                        CreatedAt = b.CreatedAt
+                        CreatedAt = b.CreatedAt,
+                        CoverImageUrl = b.CoverImageUrl
                     })
                     .ToListAsync();
 
@@ -64,7 +65,9 @@ namespace PustakBhandar.Controllers
         }
 
         [HttpPost("books")]
-        public async Task<ActionResult<BookResponseDto>> CreateBook(CreateBookDto createBookDto)
+        public async Task<ActionResult<BookResponseDto>> CreateBook(
+            [FromForm] CreateBookDto createBookDto,
+            [FromForm] IFormFile? coverImage)
         {
             try
             {
@@ -123,6 +126,23 @@ namespace PustakBhandar.Controllers
                         });
                 }
 
+                // Handle image upload
+                string coverImageUrl = null;
+                if (coverImage != null && coverImage.Length > 0)
+                {
+                    var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", "covers");
+                    if (!Directory.Exists(uploadsFolder))
+                        Directory.CreateDirectory(uploadsFolder);
+
+                    var fileName = Guid.NewGuid().ToString() + Path.GetExtension(coverImage.FileName);
+                    var filePath = Path.Combine(uploadsFolder, fileName);
+                    using (var stream = new FileStream(filePath, FileMode.Create))
+                    {
+                        await coverImage.CopyToAsync(stream);
+                    }
+                    coverImageUrl = "/uploads/covers/" + fileName;
+                }
+
                 var book = new Book
                 {
                     Title = createBookDto.Title,
@@ -135,7 +155,8 @@ namespace PustakBhandar.Controllers
                     PublicationDate = DateTime.SpecifyKind(createBookDto.PublicationDate, DateTimeKind.Utc),
                     Quantity = createBookDto.Quantity,
                     OnSale = createBookDto.OnSale,
-                    DiscountId = createBookDto.DiscountId
+                    DiscountId = createBookDto.DiscountId,
+                    CoverImageUrl = coverImageUrl
                 };
 
                 _context.Books.Add(book);
@@ -175,7 +196,8 @@ namespace PustakBhandar.Controllers
                         OnSale = createdBook.OnSale,
                         DiscountId = createdBook.DiscountId,
                         DiscountPercentage = createdBook.Discount?.Percentage,
-                        CreatedAt = createdBook.CreatedAt
+                        CreatedAt = createdBook.CreatedAt,
+                        CoverImageUrl = createdBook.CoverImageUrl
                     }
                 });
             }

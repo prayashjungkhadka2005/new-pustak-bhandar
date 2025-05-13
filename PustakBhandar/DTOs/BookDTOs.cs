@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Http;
 
 namespace PustakBhandar.DTOs
 {
@@ -40,6 +41,9 @@ namespace PustakBhandar.DTOs
 
         public bool OnSale { get; set; }
         public string? DiscountId { get; set; }
+
+        // New property for image upload
+        public IFormFile? CoverImage { get; set; }
 
         // Obsolete: For backward compatibility
         [Obsolete("Use AuthorName instead.")]
@@ -105,5 +109,6 @@ namespace PustakBhandar.DTOs
         public string? DiscountId { get; set; }
         public decimal? DiscountPercentage { get; set; }
         public DateTime CreatedAt { get; set; }
+        public string? CoverImageUrl { get; set; }
     }
 } 
