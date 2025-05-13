@@ -172,7 +172,14 @@ const AddBook = () => {
       formData.append('publicationDate', form.publicationDate);
       formData.append('quantity', form.quantity);
       formData.append('onSale', form.onSale);
-      if (form.discountId) formData.append('discountId', form.discountId);
+
+      const validDiscountIds = discounts.map(d => d.id);
+      let discountIdToSend = '';
+      if (form.discountId && validDiscountIds.includes(form.discountId)) {
+        discountIdToSend = form.discountId;
+      }
+      formData.append('discountId', discountIdToSend);
+
       if (form.coverImage) formData.append('coverImage', form.coverImage);
 
       const token = localStorage.getItem('userSession') ? JSON.parse(localStorage.getItem('userSession')).token : '';
@@ -275,7 +282,14 @@ const AddBook = () => {
                           <span className="inline-block w-12 h-16 flex items-center justify-center bg-gray-100 text-gray-400 rounded border border-gray-200 text-xs">No image</span>
                         )}
                       </td>
-                      <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900 font-medium">{book.title}</td>
+                      <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900 font-medium">
+                        {book.title}
+                        {book.discountId && (
+                          <span className="inline-flex items-center gap-2 ml-2 bg-orange-100 text-orange-700 text-xs font-semibold px-2 py-0.5 rounded-full">
+                            Discount{book.discountPercentage ? `: ${book.discountPercentage}%` : ''}
+                          </span>
+                        )}
+                      </td>
                       <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-700">{book.authorName}</td>
                       <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-700">${book.price}</td>
                       <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-700">{book.onSale ? 'Yes' : 'No'}</td>

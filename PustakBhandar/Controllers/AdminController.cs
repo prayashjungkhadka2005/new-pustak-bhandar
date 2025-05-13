@@ -305,6 +305,29 @@ namespace PustakBhandar.Controllers
                     });
                 }
 
+                // Normalize DiscountId: treat empty string as null
+                if (updateBookDto.DiscountId != null && updateBookDto.DiscountId.Trim() == "")
+                {
+                    updateBookDto.DiscountId = null;
+                }
+                if (updateBookDto.DiscountId != null)
+                {
+                    var discount = await _context.Discounts.FindAsync(updateBookDto.DiscountId);
+                    if (discount == null)
+                        return BadRequest(new {
+                            status = 400,
+                            message = "Discount not found",
+                            error = "Bad Request",
+                            discountId = updateBookDto.DiscountId
+                        });
+                    book.DiscountId = updateBookDto.DiscountId;
+                }
+                else if (updateBookDto.DiscountId == null)
+                {
+                    // Remove discount
+                    book.DiscountId = null;
+                }
+
                 // Update properties if provided
                 if (updateBookDto.Title != null)
                     book.Title = updateBookDto.Title;
@@ -353,18 +376,6 @@ namespace PustakBhandar.Controllers
                     book.Quantity = updateBookDto.Quantity.Value;
                 if (updateBookDto.OnSale.HasValue)
                     book.OnSale = updateBookDto.OnSale.Value;
-                if (updateBookDto.DiscountId != null)
-                {
-                    var discount = await _context.Discounts.FindAsync(updateBookDto.DiscountId);
-                    if (discount == null)
-                        return BadRequest(new {
-                            status = 400,
-                            message = "Discount not found",
-                            error = "Bad Request",
-                            discountId = updateBookDto.DiscountId
-                        });
-                    book.DiscountId = updateBookDto.DiscountId;
-                }
 
                 // Handle image upload if provided
                 if (coverImage != null && coverImage.Length > 0)
@@ -561,7 +572,10 @@ namespace PustakBhandar.Controllers
         {
             try
             {
-                var discount = await _context.Discounts.FindAsync(id);
+                var discount = await _context.Discounts
+                    .Include(d => d.Books) // Include related books
+                    .FirstOrDefaultAsync(d => d.Id == id);
+            
                 if (discount == null)
                     return NotFound(new {
                         status = 404,
@@ -610,7 +624,18 @@ namespace PustakBhandar.Controllers
                 if (updateDiscountDto.EndDate.HasValue)
                     discount.EndDate = DateTime.SpecifyKind(updateDiscountDto.EndDate.Value, DateTimeKind.Utc);
                 if (updateDiscountDto.IsActive.HasValue)
+                {
+                    // If discount is being deactivated, clear all book associations
+                    if (!updateDiscountDto.IsActive.Value && discount.IsActive)
+                    {
+                        foreach (var book in discount.Books)
+                        {
+                            book.DiscountId = null;
+                            book.OnSale = false;
+                        }
+                    }
                     discount.IsActive = updateDiscountDto.IsActive.Value;
+                }
 
                 discount.UpdatedAt = DateTime.UtcNow;
                 await _context.SaveChangesAsync();

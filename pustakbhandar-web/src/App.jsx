@@ -14,6 +14,7 @@ import AdminLayout from './pages/admin/AdminLayout';
 import Dashboard from './pages/admin/Dashboard';
 import StaffDashboard from './pages/staff/Dashboard';
 import AddBook from './pages/admin/AddBook';
+import DiscountPage from './pages/admin/DiscountPage';
 
 function App() {
   return (
@@ -81,6 +82,7 @@ function App() {
             <Route index element={<Navigate to="dashboard" replace />} />
             <Route path="dashboard" element={<Dashboard />} />
             <Route path="books/add" element={<AddBook />} />
+            <Route path="discounts" element={<DiscountPage />} />
             {/* Add more admin routes here */}
           </Route>
 
