@@ -71,6 +71,45 @@ namespace PustakBhandar.Controllers
         {
             try
             {
+                // Unique ISBN check
+                var existingIsbn = await _context.Books.FirstOrDefaultAsync(b => b.ISBN.ToLower() == createBookDto.ISBN.ToLower());
+                if (existingIsbn != null)
+                {
+                    return BadRequest(new {
+                        status = 400,
+                        message = "A book with this ISBN already exists",
+                        error = "Duplicate ISBN",
+                        existingBookId = existingIsbn.Id
+                    });
+                }
+                // Price validation
+                if (createBookDto.Price <= 0)
+                {
+                    return BadRequest(new {
+                        status = 400,
+                        message = "Price must be a positive number",
+                        error = "Invalid Price"
+                    });
+                }
+                // Quantity validation
+                if (createBookDto.Quantity < 0)
+                {
+                    return BadRequest(new {
+                        status = 400,
+                        message = "Quantity must be a non-negative integer",
+                        error = "Invalid Quantity"
+                    });
+                }
+                // Publication date validation
+                if (createBookDto.PublicationDate == default)
+                {
+                    return BadRequest(new {
+                        status = 400,
+                        message = "Publication date is required and must be valid",
+                        error = "Invalid Publication Date"
+                    });
+                }
+
                 // Check for duplicate title
                 var existingBook = await _context.Books
                     .FirstOrDefaultAsync(b => b.Title.ToLower() == createBookDto.Title.ToLower());
@@ -225,6 +264,46 @@ namespace PustakBhandar.Controllers
                         error = "Not Found",
                         bookId = id
                     });
+                // Unique ISBN check (exclude current book)
+                if (!string.IsNullOrWhiteSpace(updateBookDto.ISBN))
+                {
+                    var isbnExists = await _context.Books.AnyAsync(b => b.ISBN.ToLower() == updateBookDto.ISBN.ToLower() && b.Id != id);
+                    if (isbnExists)
+                    {
+                        return BadRequest(new {
+                            status = 400,
+                            message = "A book with this ISBN already exists",
+                            error = "Duplicate ISBN"
+                        });
+                    }
+                }
+                // Price validation
+                if (updateBookDto.Price.HasValue && updateBookDto.Price.Value <= 0)
+                {
+                    return BadRequest(new {
+                        status = 400,
+                        message = "Price must be a positive number",
+                        error = "Invalid Price"
+                    });
+                }
+                // Quantity validation
+                if (updateBookDto.Quantity.HasValue && updateBookDto.Quantity.Value < 0)
+                {
+                    return BadRequest(new {
+                        status = 400,
+                        message = "Quantity must be a non-negative integer",
+                        error = "Invalid Quantity"
+                    });
+                }
+                // Publication date validation
+                if (updateBookDto.PublicationDate.HasValue && updateBookDto.PublicationDate.Value == default)
+                {
+                    return BadRequest(new {
+                        status = 400,
+                        message = "Publication date is required and must be valid",
+                        error = "Invalid Publication Date"
+                    });
+                }
 
                 // Update properties if provided
                 if (updateBookDto.Title != null)

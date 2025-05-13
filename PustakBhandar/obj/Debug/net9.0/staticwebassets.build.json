@@ -1,6 +1,6 @@
 {
   "Version": 1,
-  "Hash": "GhuxmmFiSADO7NWxnv327DwBr1TwQr3ldWzCB4gqHBo=",
+  "Hash": "fIibVQHcGP5qXe4P4ShbvIwt3jrmkGdBtSwLuTSSxe4=",
   "Source": "PustakBhandar",
   "BasePath": "_content/PustakBhandar",
   "Mode": "Default",
@@ -38,6 +38,27 @@
       "OriginalItemSpec": "wwwroot\\uploads\\covers\\329b2025-fc13-4f58-8c58-27d35184b5e1.jpg"
     },
     {
+      "Identity": "D:\\Prayash Drive\\Application Development\\PustakBhandar\\wwwroot\\uploads\\covers\\802422a8-0f15-4066-8bad-f0909704c394.png",
+      "SourceId": "PustakBhandar",
+      "SourceType": "Discovered",
+      "ContentRoot": "D:\\Prayash Drive\\Application Development\\PustakBhandar\\wwwroot\\",
+      "BasePath": "_content/PustakBhandar",
+      "RelativePath": "uploads/covers/802422a8-0f15-4066-8bad-f0909704c394#[.{fingerprint}]?.png",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "Fingerprint": "qm2qppmuqu",
+      "Integrity": "0iwmFhce98Yt4V7hXuhUiSOpChaJYG5fSqxsfmtucpo=",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\uploads\\covers\\802422a8-0f15-4066-8bad-f0909704c394.png"
+    },
+    {
       "Identity": "D:\\Prayash Drive\\Application Development\\PustakBhandar\\wwwroot\\uploads\\covers\\a94df9cc-3ce8-4304-86f4-5f6557b6edca.jpg",
       "SourceId": "PustakBhandar",
       "SourceType": "Discovered",
@@ -57,6 +78,27 @@
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
       "OriginalItemSpec": "wwwroot\\uploads\\covers\\a94df9cc-3ce8-4304-86f4-5f6557b6edca.jpg"
+    },
+    {
+      "Identity": "D:\\Prayash Drive\\Application Development\\PustakBhandar\\wwwroot\\uploads\\covers\\d328ce4b-099b-4bdb-98a7-26c461a0947e.jpg",
+      "SourceId": "PustakBhandar",
+      "SourceType": "Discovered",
+      "ContentRoot": "D:\\Prayash Drive\\Application Development\\PustakBhandar\\wwwroot\\",
+      "BasePath": "_content/PustakBhandar",
+      "RelativePath": "uploads/covers/d328ce4b-099b-4bdb-98a7-26c461a0947e#[.{fingerprint}]?.jpg",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "Fingerprint": "os0vszxxrc",
+      "Integrity": "yG1KNC304+E8moTgiLDLkCUDuoAJJQ+QF1FT9GDEiBQ=",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\uploads\\covers\\d328ce4b-099b-4bdb-98a7-26c461a0947e.jpg"
     }
   ],
   "Endpoints": [
@@ -143,6 +185,88 @@
       ]
     },
     {
+      "Route": "uploads/covers/802422a8-0f15-4066-8bad-f0909704c394.png",
+      "AssetFile": "D:\\Prayash Drive\\Application Development\\PustakBhandar\\wwwroot\\uploads\\covers\\802422a8-0f15-4066-8bad-f0909704c394.png",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "66799"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "image/png"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"0iwmFhce98Yt4V7hXuhUiSOpChaJYG5fSqxsfmtucpo=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Tue, 13 May 2025 14:48:01 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=3600, must-revalidate"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-0iwmFhce98Yt4V7hXuhUiSOpChaJYG5fSqxsfmtucpo="
+        }
+      ]
+    },
+    {
+      "Route": "uploads/covers/802422a8-0f15-4066-8bad-f0909704c394.qm2qppmuqu.png",
+      "AssetFile": "D:\\Prayash Drive\\Application Development\\PustakBhandar\\wwwroot\\uploads\\covers\\802422a8-0f15-4066-8bad-f0909704c394.png",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "66799"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "image/png"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"0iwmFhce98Yt4V7hXuhUiSOpChaJYG5fSqxsfmtucpo=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Tue, 13 May 2025 14:48:01 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "qm2qppmuqu"
+        },
+        {
+          "Name": "label",
+          "Value": "uploads/covers/802422a8-0f15-4066-8bad-f0909704c394.png"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-0iwmFhce98Yt4V7hXuhUiSOpChaJYG5fSqxsfmtucpo="
+        }
+      ]
+    },
+    {
       "Route": "uploads/covers/a94df9cc-3ce8-4304-86f4-5f6557b6edca.evw1yn0imd.jpg",
       "AssetFile": "D:\\Prayash Drive\\Application Development\\PustakBhandar\\wwwroot\\uploads\\covers\\a94df9cc-3ce8-4304-86f4-5f6557b6edca.jpg",
       "Selectors": [],
@@ -221,6 +345,88 @@
         {
           "Name": "integrity",
           "Value": "sha256-qvrnD+J6M6EGdNv/wFPTl7UshLlXlLu1UwdSKRYSO2k="
+        }
+      ]
+    },
+    {
+      "Route": "uploads/covers/d328ce4b-099b-4bdb-98a7-26c461a0947e.jpg",
+      "AssetFile": "D:\\Prayash Drive\\Application Development\\PustakBhandar\\wwwroot\\uploads\\covers\\d328ce4b-099b-4bdb-98a7-26c461a0947e.jpg",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "38217"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "image/jpeg"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"yG1KNC304+E8moTgiLDLkCUDuoAJJQ+QF1FT9GDEiBQ=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Tue, 13 May 2025 14:45:58 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=3600, must-revalidate"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-yG1KNC304+E8moTgiLDLkCUDuoAJJQ+QF1FT9GDEiBQ="
+        }
+      ]
+    },
+    {
+      "Route": "uploads/covers/d328ce4b-099b-4bdb-98a7-26c461a0947e.os0vszxxrc.jpg",
+      "AssetFile": "D:\\Prayash Drive\\Application Development\\PustakBhandar\\wwwroot\\uploads\\covers\\d328ce4b-099b-4bdb-98a7-26c461a0947e.jpg",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "38217"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "image/jpeg"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"yG1KNC304+E8moTgiLDLkCUDuoAJJQ+QF1FT9GDEiBQ=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Tue, 13 May 2025 14:45:58 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "os0vszxxrc"
+        },
+        {
+          "Name": "label",
+          "Value": "uploads/covers/d328ce4b-099b-4bdb-98a7-26c461a0947e.jpg"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-yG1KNC304+E8moTgiLDLkCUDuoAJJQ+QF1FT9GDEiBQ="
         }
       ]
     }

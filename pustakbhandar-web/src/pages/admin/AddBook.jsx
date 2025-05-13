@@ -200,11 +200,9 @@ const AddBook = () => {
         fetchBooks();
         showSuccess(editMode ? 'Book updated successfully!' : 'Book added successfully!');
       } else {
-        setErrors({ api: data.message || (editMode ? 'Failed to update book.' : 'Failed to add book.') });
         showError(data.message || (editMode ? 'Failed to update book.' : 'Failed to add book.'));
       }
     } catch (err) {
-      setErrors({ api: editMode ? 'Failed to update book.' : 'Failed to add book.' });
       showError(editMode ? 'Failed to update book.' : 'Failed to add book.');
     } finally {
       setSubmitting(false);
@@ -355,7 +353,7 @@ const AddBook = () => {
       {modalOpen && (
         <ModalPortal>
           <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black bg-opacity-30 p-4">
-            <div className="bg-white rounded-xl shadow-lg p-6 w-full max-w-2xl relative">
+            <div className="bg-white rounded-xl shadow-lg px-6 py-4 w-full max-w-2xl relative">
               <button
                 className="absolute top-3 right-3 text-gray-400 hover:text-gray-600 text-2xl font-bold"
                 onClick={closeModal}
@@ -365,7 +363,7 @@ const AddBook = () => {
               </button>
               <h2 className="text-xl font-bold text-gray-900 mb-4">{editMode ? 'Edit Book' : 'Add New Book'}</h2>
               {errors.api && <div className="mb-3 p-2 rounded bg-red-50 text-red-700 border border-red-200">{errors.api}</div>}
-              <form onSubmit={handleSubmit} className="space-y-4">
+              <form onSubmit={handleSubmit} className="space-y-2">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Title *</label>
