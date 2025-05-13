@@ -16,6 +16,7 @@ import StaffDashboard from './pages/staff/Dashboard';
 import AddBook from './pages/admin/AddBook';
 import DiscountPage from './pages/admin/DiscountPage';
 import AnnouncementPage from './pages/admin/AnnouncementPage';
+import OrderPage from './pages/admin/OrderPage';
 
 function App() {
   return (
@@ -85,6 +86,7 @@ function App() {
             <Route path="books/add" element={<AddBook />} />
             <Route path="discounts" element={<DiscountPage />} />
             <Route path="announcements" element={<AnnouncementPage />} />
+            <Route path="orders" element={<OrderPage />} />
             {/* Add more admin routes here */}
           </Route>
 

@@ -12,8 +12,8 @@ using PustakBhandar.Data;
 namespace PustakBhandar.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250513055013_AddReviewsAndNotifications")]
-    partial class AddReviewsAndNotifications
+    [Migration("20250513171219_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

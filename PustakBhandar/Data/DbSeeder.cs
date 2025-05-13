@@ -36,6 +36,9 @@ namespace PustakBhandar.Data
 
             // Create announcements if they don't exist
             await CreateAnnouncementsAsync();
+
+            // Create orders if they don't exist
+            await CreateOrdersAsync();
         }
 
         private async Task CreateRolesAsync()
@@ -254,6 +257,47 @@ namespace PustakBhandar.Data
                     };
 
                     await _context.Announcements.AddRangeAsync(announcements);
+                    await _context.SaveChangesAsync();
+                }
+            }
+        }
+
+        private async Task CreateOrdersAsync()
+        {
+            if (!await _context.Orders.AnyAsync())
+            {
+                var member = await _userManager.FindByEmailAsync("member@pustakbhandar.com");
+                var staff = await _userManager.FindByEmailAsync("staff@pustakbhandar.com");
+                var book = await _context.Books.FirstOrDefaultAsync();
+                if (member != null && staff != null && book != null)
+                {
+                    var order = new Order
+                    {
+                        Id = Guid.NewGuid().ToString(),
+                        MemberId = member.Id,
+                        ClaimCode = "ABC123",
+                        TotalAmount = book.Price * 2,
+                        DiscountApplied = 10,
+                        Status = "Completed",
+                        OrderDate = DateTime.UtcNow,
+                        ProcessedByStaffId = staff.Id
+                    };
+
+                    // Create and add order items
+                    var orderItem = new OrderItem
+                    {
+                        OrderId = order.Id,
+                        BookId = book.Id,
+                        Price = book.Price,
+                        Quantity = 2
+                    };
+
+                    // Add the order first
+                    _context.Orders.Add(order);
+                    await _context.SaveChangesAsync();
+
+                    // Then add the order item
+                    _context.OrderItems.Add(orderItem);
                     await _context.SaveChangesAsync();
                 }
             }
