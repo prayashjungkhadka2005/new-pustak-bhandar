@@ -14,6 +14,8 @@ namespace PustakBhandar.DTOs
         public decimal DiscountApplied { get; set; }
         public string Status { get; set; } = string.Empty;
         public DateTime OrderDate { get; set; }
+        public string? OrderTime { get; set; }
+        public string? DiscountName { get; set; }
         public string? ProcessedByStaffId { get; set; }
         public string? ProcessedByStaffName { get; set; }
         public List<OrderItemResponseDto> Items { get; set; } = new List<OrderItemResponseDto>();

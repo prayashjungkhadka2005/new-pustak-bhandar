@@ -548,16 +548,16 @@ namespace PustakBhandar.Controllers
                 await _context.SaveChangesAsync();
 
                 return Ok(new { status = "success", message = "Discount created successfully", data = new DiscountResponseDto
-                {
-                    Id = discount.Id,
-                    AdminId = discount.AdminId,
-                    Description = discount.Description,
-                    Percentage = discount.Percentage,
-                    StartDate = discount.StartDate,
-                    EndDate = discount.EndDate,
-                    IsActive = discount.IsActive,
-                    CreatedAt = discount.CreatedAt,
-                    UpdatedAt = discount.UpdatedAt
+                    {
+                        Id = discount.Id,
+                        AdminId = discount.AdminId,
+                        Description = discount.Description,
+                        Percentage = discount.Percentage,
+                        StartDate = discount.StartDate,
+                        EndDate = discount.EndDate,
+                        IsActive = discount.IsActive,
+                        CreatedAt = discount.CreatedAt,
+                        UpdatedAt = discount.UpdatedAt
                 } });
             }
             catch (Exception ex)
@@ -641,16 +641,16 @@ namespace PustakBhandar.Controllers
                 await _context.SaveChangesAsync();
 
                 return Ok(new { status = "success", message = "Discount updated successfully", data = new DiscountResponseDto
-                {
-                    Id = discount.Id,
-                    AdminId = discount.AdminId,
-                    Description = discount.Description,
-                    Percentage = discount.Percentage,
-                    StartDate = discount.StartDate,
-                    EndDate = discount.EndDate,
-                    IsActive = discount.IsActive,
-                    CreatedAt = discount.CreatedAt,
-                    UpdatedAt = discount.UpdatedAt
+                    {
+                        Id = discount.Id,
+                        AdminId = discount.AdminId,
+                        Description = discount.Description,
+                        Percentage = discount.Percentage,
+                        StartDate = discount.StartDate,
+                        EndDate = discount.EndDate,
+                        IsActive = discount.IsActive,
+                        CreatedAt = discount.CreatedAt,
+                        UpdatedAt = discount.UpdatedAt
                 } });
             }
             catch (Exception ex)
@@ -895,6 +895,8 @@ namespace PustakBhandar.Controllers
                     DiscountApplied = o.DiscountApplied,
                     Status = o.Status,
                     OrderDate = o.OrderDate,
+                    OrderTime = o.OrderDate.ToString("HH:mm:ss"),
+                    DiscountName = o.Items.Select(i => i.Book?.Discount?.Description).FirstOrDefault(d => !string.IsNullOrEmpty(d)),
                     ProcessedByStaffId = o.ProcessedByStaffId,
                     ProcessedByStaffName = o.ProcessedByStaff?.FullName,
                     Items = o.Items.Select(i => new OrderItemResponseDto
