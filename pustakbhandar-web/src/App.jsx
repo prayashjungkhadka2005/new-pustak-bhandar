@@ -17,6 +17,7 @@ import AddBook from './pages/admin/AddBook';
 import DiscountPage from './pages/admin/DiscountPage';
 import AnnouncementPage from './pages/admin/AnnouncementPage';
 import OrderPage from './pages/admin/OrderPage';
+import UserManagementPage from './pages/admin/UserManagementPage';
 
 function App() {
   return (
@@ -87,6 +88,7 @@ function App() {
             <Route path="discounts" element={<DiscountPage />} />
             <Route path="announcements" element={<AnnouncementPage />} />
             <Route path="orders" element={<OrderPage />} />
+            <Route path="users" element={<UserManagementPage />} />
             {/* Add more admin routes here */}
           </Route>
 

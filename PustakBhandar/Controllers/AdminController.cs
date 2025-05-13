@@ -938,8 +938,8 @@ namespace PustakBhandar.Controllers
                     Email = m.Email,
                     PhoneNumber = m.PhoneNumber,
                     JoinDate = ((Member)m).JoinDate,
-                    TotalOrders = ((Member)m).TotalOrders,
-                    DiscountEarned = ((Member)m).DiscountEarned,
+                    TotalOrders = _context.Orders.Count(o => o.MemberId == m.Id),
+                    DiscountEarned = _context.Orders.Where(o => o.MemberId == m.Id && o.Status == "Completed").Sum(o => (decimal?)o.DiscountApplied) ?? 0,
                     IsActive = m.EmailConfirmed,
                     CreatedAt = m.CreatedAt
                 });
@@ -1038,6 +1038,39 @@ namespace PustakBhandar.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error updating inventory");
+                return StatusCode(500, new { status = 500, message = "Internal server error" });
+            }
+        }
+
+        [HttpGet("staff")]
+        [Authorize(Roles = "Admin")]
+        public async Task<ActionResult<IEnumerable<AdminMemberResponseDto>>> GetStaff()
+        {
+            try
+            {
+                var staffUsers = await _context.Users
+                    .Where(u => u.GetType() == typeof(Staff))
+                    .OrderByDescending(s => s.CreatedAt)
+                    .ToListAsync();
+
+                var response = staffUsers.Select(s => new AdminMemberResponseDto
+                {
+                    Id = s.Id,
+                    FullName = s.FullName,
+                    Email = s.Email,
+                    PhoneNumber = s.PhoneNumber,
+                    JoinDate = s.CreatedAt, // or a Staff-specific property if you have one
+                    TotalOrders = _context.Orders.Count(o => o.ProcessedByStaffId == s.Id),
+                    DiscountEarned = 0, // Not applicable for staff
+                    IsActive = s.EmailConfirmed,
+                    CreatedAt = s.CreatedAt
+                });
+
+                return Ok(new { status = 200, data = response });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving staff");
                 return StatusCode(500, new { status = 500, message = "Internal server error" });
             }
         }

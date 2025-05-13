@@ -16,7 +16,7 @@ const navigation = [
   { name: 'Books', href: '/admin/books/add', icon: BookOpenIcon },
   { name: 'Discounts', href: '/admin/discounts', icon: TagIcon },
   { name: 'Orders', href: '/admin/orders', icon: ShoppingCartIcon },
-  { name: 'Members', href: '/admin/members', icon: UserGroupIcon },
+  { name: 'Members', href: '/admin/users', icon: UserGroupIcon },
   { name: 'Announcements', href: '/admin/announcements', icon: MegaphoneIcon },
   { name: 'Reports', href: '/admin/reports', icon: ChartBarIcon },
   { name: 'Settings', href: '/admin/settings', icon: Cog6ToothIcon },
