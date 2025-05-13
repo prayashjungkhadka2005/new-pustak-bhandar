@@ -525,7 +525,7 @@ namespace PustakBhandar.Migrations
                     b.Property<string>("Id")
                         .HasColumnType("text");
 
-                    b.Property<string>("ApplicationUserId")
+                    b.Property<string>("AdminId")
                         .HasColumnType("text");
 
                     b.Property<bool>("IsRead")
@@ -544,18 +544,23 @@ namespace PustakBhandar.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<string>("StaffId")
+                        .HasColumnType("text");
+
                     b.Property<DateTime>("Timestamp")
                         .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ApplicationUserId");
+                    b.HasIndex("AdminId");
 
                     b.HasIndex("MemberId");
 
                     b.HasIndex("OrderId");
 
-                    b.ToTable("Notification");
+                    b.HasIndex("StaffId");
+
+                    b.ToTable("Notifications");
                 });
 
             modelBuilder.Entity("PustakBhandar.Models.Order", b =>
@@ -682,7 +687,7 @@ namespace PustakBhandar.Migrations
 
                     b.HasIndex("StaffId");
 
-                    b.ToTable("Review");
+                    b.ToTable("Reviews");
                 });
 
             modelBuilder.Entity("PustakBhandar.Models.Session", b =>
@@ -940,12 +945,12 @@ namespace PustakBhandar.Migrations
 
             modelBuilder.Entity("PustakBhandar.Models.Notification", b =>
                 {
-                    b.HasOne("PustakBhandar.Models.ApplicationUser", null)
+                    b.HasOne("PustakBhandar.Models.Admin", null)
                         .WithMany("Notifications")
-                        .HasForeignKey("ApplicationUserId");
+                        .HasForeignKey("AdminId");
 
                     b.HasOne("PustakBhandar.Models.Member", "Member")
-                        .WithMany()
+                        .WithMany("Notifications")
                         .HasForeignKey("MemberId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -955,6 +960,10 @@ namespace PustakBhandar.Migrations
                         .HasForeignKey("OrderId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.HasOne("PustakBhandar.Models.Staff", null)
+                        .WithMany("Notifications")
+                        .HasForeignKey("StaffId");
 
                     b.Navigation("Member");
 
@@ -1072,11 +1081,6 @@ namespace PustakBhandar.Migrations
                     b.Navigation("Wishlist");
                 });
 
-            modelBuilder.Entity("PustakBhandar.Models.ApplicationUser", b =>
-                {
-                    b.Navigation("Notifications");
-                });
-
             modelBuilder.Entity("PustakBhandar.Models.Author", b =>
                 {
                     b.Navigation("Books");
@@ -1120,12 +1124,16 @@ namespace PustakBhandar.Migrations
 
             modelBuilder.Entity("PustakBhandar.Models.Admin", b =>
                 {
+                    b.Navigation("Notifications");
+
                     b.Navigation("Reviews");
                 });
 
             modelBuilder.Entity("PustakBhandar.Models.Member", b =>
                 {
                     b.Navigation("Cart");
+
+                    b.Navigation("Notifications");
 
                     b.Navigation("Orders");
 
@@ -1136,6 +1144,8 @@ namespace PustakBhandar.Migrations
 
             modelBuilder.Entity("PustakBhandar.Models.Staff", b =>
                 {
+                    b.Navigation("Notifications");
+
                     b.Navigation("Reviews");
                 });
 #pragma warning restore 612, 618

@@ -658,5 +658,152 @@ namespace PustakBhandar.Controllers
 
             return Ok(response);
         }
+
+        [HttpGet("discounts")]
+        public async Task<ActionResult<List<DiscountResponseDto>>> GetEligibleDiscounts()
+        {
+            try
+            {
+                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (string.IsNullOrEmpty(userId))
+                    return Unauthorized(new { status = 401, message = "Unauthorized" });
+
+                var member = await _context.Users
+                    .OfType<Member>()
+                    .Include(m => m.Orders)
+                    .FirstOrDefaultAsync(m => m.Id == userId);
+
+                if (member == null)
+                    return NotFound(new { status = 404, message = "Member not found" });
+
+                var currentDate = DateTime.UtcNow;
+                var eligibleDiscounts = await _context.Discounts
+                    .Where(d => d.IsActive && 
+                           d.StartDate <= currentDate && 
+                           d.EndDate >= currentDate)
+                    .Select(d => new DiscountResponseDto
+                    {
+                        Id = d.Id,
+                        AdminId = d.AdminId,
+                        Description = d.Description,
+                        Percentage = d.Percentage,
+                        StartDate = d.StartDate,
+                        EndDate = d.EndDate,
+                        IsActive = d.IsActive,
+                        CreatedAt = d.CreatedAt,
+                        UpdatedAt = d.UpdatedAt
+                    })
+                    .ToListAsync();
+
+                // Add member-specific discounts based on order count
+                if (member.TotalOrders >= 10)
+                {
+                    eligibleDiscounts.Add(new DiscountResponseDto
+                    {
+                        Id = "loyalty-discount",
+                        Description = "Loyalty Discount - 10% off for 10+ orders",
+                        Percentage = 10,
+                        StartDate = currentDate,
+                        EndDate = currentDate.AddYears(1),
+                        IsActive = true,
+                        CreatedAt = currentDate
+                    });
+                }
+
+                return Ok(new { status = 200, data = eligibleDiscounts });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving eligible discounts");
+                return StatusCode(500, new { status = 500, message = "Internal server error" });
+            }
+        }
+
+        [HttpPost("reviews")]
+        public async Task<ActionResult<ReviewResponseDto>> CreateReview(CreateReviewDto request)
+        {
+            try
+            {
+                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (string.IsNullOrEmpty(userId))
+                    return Unauthorized(new { status = 401, message = "Unauthorized" });
+
+                // Verify if the member has purchased the book
+                var hasPurchased = await _context.Orders
+                    .Include(o => o.Items)
+                    .AnyAsync(o => o.MemberId == userId && 
+                                 o.Items.Any(i => i.BookId == request.BookId));
+
+                if (!hasPurchased)
+                    return BadRequest(new { status = 400, message = "You can only review books you have purchased" });
+
+                // Check if member has already reviewed this book
+                var existingReview = await _context.Reviews
+                    .FirstOrDefaultAsync(r => r.MemberId == userId && r.BookId == request.BookId);
+
+                if (existingReview != null)
+                    return BadRequest(new { status = 400, message = "You have already reviewed this book" });
+
+                var review = new Review
+                {
+                    BookId = request.BookId,
+                    MemberId = userId,
+                    Rating = request.Rating,
+                    Comment = request.Comment,
+                    ReviewDate = DateTime.UtcNow
+                };
+
+                _context.Reviews.Add(review);
+                await _context.SaveChangesAsync();
+
+                var response = new ReviewResponseDto
+                {
+                    Id = review.Id,
+                    BookId = review.BookId,
+                    MemberId = review.MemberId,
+                    Rating = review.Rating,
+                    Comment = review.Comment,
+                    ReviewDate = review.ReviewDate
+                };
+
+                return Ok(new { status = 201, data = response });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error creating review");
+                return StatusCode(500, new { status = 500, message = "Internal server error" });
+            }
+        }
+
+        [HttpGet("notifications")]
+        public async Task<ActionResult<List<NotificationResponseDto>>> GetNotifications()
+        {
+            try
+            {
+                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (string.IsNullOrEmpty(userId))
+                    return Unauthorized(new { status = 401, message = "Unauthorized" });
+
+                var notifications = await _context.Notifications
+                    .Where(n => n.MemberId == userId)
+                    .OrderByDescending(n => n.Timestamp)
+                    .Select(n => new NotificationResponseDto
+                    {
+                        Id = n.Id,
+                        Message = n.Message,
+                        OrderId = n.OrderId,
+                        Timestamp = n.Timestamp,
+                        IsRead = n.IsRead
+                    })
+                    .ToListAsync();
+
+                return Ok(new { status = 200, data = notifications });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving notifications");
+                return StatusCode(500, new { status = 500, message = "Internal server error" });
+            }
+        }
     }
 } 

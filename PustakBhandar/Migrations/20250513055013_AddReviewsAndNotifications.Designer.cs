@@ -12,8 +12,8 @@ using PustakBhandar.Data;
 namespace PustakBhandar.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250512115909_UpdateCartMemberRelationship")]
-    partial class UpdateCartMemberRelationship
+    [Migration("20250513055013_AddReviewsAndNotifications")]
+    partial class AddReviewsAndNotifications
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -563,7 +563,7 @@ namespace PustakBhandar.Migrations
 
                     b.HasIndex("StaffId");
 
-                    b.ToTable("Notification");
+                    b.ToTable("Notifications");
                 });
 
             modelBuilder.Entity("PustakBhandar.Models.Order", b =>
@@ -690,7 +690,7 @@ namespace PustakBhandar.Migrations
 
                     b.HasIndex("StaffId");
 
-                    b.ToTable("Review");
+                    b.ToTable("Reviews");
                 });
 
             modelBuilder.Entity("PustakBhandar.Models.Session", b =>
@@ -730,7 +730,7 @@ namespace PustakBhandar.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<string>("UserId")
+                    b.Property<string>("MemberId")
                         .IsRequired()
                         .HasColumnType("text");
 
@@ -738,7 +738,7 @@ namespace PustakBhandar.Migrations
 
                     b.HasIndex("BookId");
 
-                    b.HasIndex("UserId")
+                    b.HasIndex("MemberId")
                         .IsUnique();
 
                     b.ToTable("Wishlists");
@@ -747,6 +747,11 @@ namespace PustakBhandar.Migrations
             modelBuilder.Entity("PustakBhandar.Models.Admin", b =>
                 {
                     b.HasBaseType("PustakBhandar.Models.ApplicationUser");
+
+                    b.Property<string>("WishlistId")
+                        .HasColumnType("text");
+
+                    b.HasIndex("WishlistId");
 
                     b.HasDiscriminator().HasValue("Admin");
                 });
@@ -770,6 +775,17 @@ namespace PustakBhandar.Migrations
             modelBuilder.Entity("PustakBhandar.Models.Staff", b =>
                 {
                     b.HasBaseType("PustakBhandar.Models.ApplicationUser");
+
+                    b.Property<string>("WishlistId")
+                        .HasColumnType("text");
+
+                    b.HasIndex("WishlistId");
+
+                    b.ToTable("AspNetUsers", t =>
+                        {
+                            t.Property("WishlistId")
+                                .HasColumnName("Staff_WishlistId");
+                        });
 
                     b.HasDiscriminator().HasValue("Staff");
                 });
@@ -1039,19 +1055,32 @@ namespace PustakBhandar.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("PustakBhandar.Models.ApplicationUser", "User")
+                    b.HasOne("PustakBhandar.Models.Member", "Member")
                         .WithOne("Wishlist")
-                        .HasForeignKey("PustakBhandar.Models.Wishlist", "UserId")
+                        .HasForeignKey("PustakBhandar.Models.Wishlist", "MemberId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Book");
 
-                    b.Navigation("User");
+                    b.Navigation("Member");
                 });
 
-            modelBuilder.Entity("PustakBhandar.Models.ApplicationUser", b =>
+            modelBuilder.Entity("PustakBhandar.Models.Admin", b =>
                 {
+                    b.HasOne("PustakBhandar.Models.Wishlist", "Wishlist")
+                        .WithMany()
+                        .HasForeignKey("WishlistId");
+
+                    b.Navigation("Wishlist");
+                });
+
+            modelBuilder.Entity("PustakBhandar.Models.Staff", b =>
+                {
+                    b.HasOne("PustakBhandar.Models.Wishlist", "Wishlist")
+                        .WithMany()
+                        .HasForeignKey("WishlistId");
+
                     b.Navigation("Wishlist");
                 });
 
@@ -1112,6 +1141,8 @@ namespace PustakBhandar.Migrations
                     b.Navigation("Orders");
 
                     b.Navigation("Reviews");
+
+                    b.Navigation("Wishlist");
                 });
 
             modelBuilder.Entity("PustakBhandar.Models.Staff", b =>

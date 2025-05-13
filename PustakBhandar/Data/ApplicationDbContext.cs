@@ -25,6 +25,8 @@ namespace PustakBhandar.Data
         public DbSet<Order> Orders { get; set; }
         public DbSet<OrderItem> OrderItems { get; set; }
         public DbSet<Wishlist> Wishlists { get; set; }
+        public DbSet<Review> Reviews { get; set; }
+        public DbSet<Notification> Notifications { get; set; }
         // Removed Wishlist, WishlistItem
 
         protected override void OnModelCreating(ModelBuilder builder)
@@ -69,6 +71,26 @@ namespace PustakBhandar.Data
                     .WithMany(d => d.Books)
                     .HasForeignKey(b => b.DiscountId)
                     .OnDelete(DeleteBehavior.SetNull);
+            });
+
+            // Configure Review
+            builder.Entity<Review>(entity =>
+            {
+                entity.HasKey(r => r.Id);
+                entity.Property(r => r.BookId).IsRequired();
+                entity.Property(r => r.MemberId).IsRequired();
+                entity.Property(r => r.Rating).IsRequired();
+                entity.Property(r => r.ReviewDate).IsRequired();
+            });
+
+            // Configure Notification
+            builder.Entity<Notification>(entity =>
+            {
+                entity.HasKey(n => n.Id);
+                entity.Property(n => n.MemberId).IsRequired();
+                entity.Property(n => n.OrderId).IsRequired();
+                entity.Property(n => n.Message).IsRequired().HasMaxLength(500);
+                entity.Property(n => n.Timestamp).IsRequired();
             });
         }
     }
