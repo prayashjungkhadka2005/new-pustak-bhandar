@@ -1,6 +1,6 @@
 {
   "Version": 1,
-  "Hash": "XGW9bsJ75mnZvy9B040UrqJSGRjyxB4NebEeQ7nUXOc=",
+  "Hash": "GhuxmmFiSADO7NWxnv327DwBr1TwQr3ldWzCB4gqHBo=",
   "Source": "PustakBhandar",
   "BasePath": "_content/PustakBhandar",
   "Mode": "Default",
@@ -16,6 +16,27 @@
     }
   ],
   "Assets": [
+    {
+      "Identity": "D:\\Prayash Drive\\Application Development\\PustakBhandar\\wwwroot\\uploads\\covers\\329b2025-fc13-4f58-8c58-27d35184b5e1.jpg",
+      "SourceId": "PustakBhandar",
+      "SourceType": "Discovered",
+      "ContentRoot": "D:\\Prayash Drive\\Application Development\\PustakBhandar\\wwwroot\\",
+      "BasePath": "_content/PustakBhandar",
+      "RelativePath": "uploads/covers/329b2025-fc13-4f58-8c58-27d35184b5e1#[.{fingerprint}]?.jpg",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "Fingerprint": "rpx1iar37u",
+      "Integrity": "EXVmeZMY8ZiChZvJPC5WWWqGDO3zSPw6i2DxHrH16es=",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\uploads\\covers\\329b2025-fc13-4f58-8c58-27d35184b5e1.jpg"
+    },
     {
       "Identity": "D:\\Prayash Drive\\Application Development\\PustakBhandar\\wwwroot\\uploads\\covers\\a94df9cc-3ce8-4304-86f4-5f6557b6edca.jpg",
       "SourceId": "PustakBhandar",
@@ -39,6 +60,88 @@
     }
   ],
   "Endpoints": [
+    {
+      "Route": "uploads/covers/329b2025-fc13-4f58-8c58-27d35184b5e1.jpg",
+      "AssetFile": "D:\\Prayash Drive\\Application Development\\PustakBhandar\\wwwroot\\uploads\\covers\\329b2025-fc13-4f58-8c58-27d35184b5e1.jpg",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "143224"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "image/jpeg"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"EXVmeZMY8ZiChZvJPC5WWWqGDO3zSPw6i2DxHrH16es=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Tue, 13 May 2025 13:37:40 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=3600, must-revalidate"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-EXVmeZMY8ZiChZvJPC5WWWqGDO3zSPw6i2DxHrH16es="
+        }
+      ]
+    },
+    {
+      "Route": "uploads/covers/329b2025-fc13-4f58-8c58-27d35184b5e1.rpx1iar37u.jpg",
+      "AssetFile": "D:\\Prayash Drive\\Application Development\\PustakBhandar\\wwwroot\\uploads\\covers\\329b2025-fc13-4f58-8c58-27d35184b5e1.jpg",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "143224"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "image/jpeg"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"EXVmeZMY8ZiChZvJPC5WWWqGDO3zSPw6i2DxHrH16es=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Tue, 13 May 2025 13:37:40 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "rpx1iar37u"
+        },
+        {
+          "Name": "label",
+          "Value": "uploads/covers/329b2025-fc13-4f58-8c58-27d35184b5e1.jpg"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-EXVmeZMY8ZiChZvJPC5WWWqGDO3zSPw6i2DxHrH16es="
+        }
+      ]
+    },
     {
       "Route": "uploads/covers/a94df9cc-3ce8-4304-86f4-5f6557b6edca.evw1yn0imd.jpg",
       "AssetFile": "D:\\Prayash Drive\\Application Development\\PustakBhandar\\wwwroot\\uploads\\covers\\a94df9cc-3ce8-4304-86f4-5f6557b6edca.jpg",

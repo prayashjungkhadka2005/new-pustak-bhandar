@@ -124,8 +124,6 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
-
-// Use CORS before authentication/authorization
 app.UseCors("AllowAll");
 
 // Add AuthMiddleware before authentication/authorization

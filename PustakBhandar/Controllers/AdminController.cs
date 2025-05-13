@@ -213,7 +213,7 @@ namespace PustakBhandar.Controllers
         }
 
         [HttpPut("books/{id}")]
-        public async Task<ActionResult<BookResponseDto>> UpdateBook(string id, UpdateBookDto updateBookDto)
+        public async Task<ActionResult<BookResponseDto>> UpdateBook(string id, [FromForm] UpdateBookDto updateBookDto, [FromForm] IFormFile? coverImage)
         {
             try
             {
@@ -287,6 +287,21 @@ namespace PustakBhandar.Controllers
                     book.DiscountId = updateBookDto.DiscountId;
                 }
 
+                // Handle image upload if provided
+                if (coverImage != null && coverImage.Length > 0)
+                {
+                    var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", "covers");
+                    if (!Directory.Exists(uploadsFolder))
+                        Directory.CreateDirectory(uploadsFolder);
+                    var fileName = Guid.NewGuid().ToString() + Path.GetExtension(coverImage.FileName);
+                    var filePath = Path.Combine(uploadsFolder, fileName);
+                    using (var stream = new FileStream(filePath, FileMode.Create))
+                    {
+                        await coverImage.CopyToAsync(stream);
+                    }
+                    book.CoverImageUrl = "/uploads/covers/" + fileName;
+                }
+
                 await _context.SaveChangesAsync();
 
                 // Get the updated book with related data
@@ -324,7 +339,8 @@ namespace PustakBhandar.Controllers
                         OnSale = updatedBook.OnSale,
                         DiscountId = updatedBook.DiscountId,
                         DiscountPercentage = updatedBook.Discount?.Percentage,
-                        CreatedAt = updatedBook.CreatedAt
+                        CreatedAt = updatedBook.CreatedAt,
+                        CoverImageUrl = updatedBook.CoverImageUrl
                     }
                 });
             }
