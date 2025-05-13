@@ -118,6 +118,57 @@ export const AuthProvider = ({ children }) => {
     showSuccess('Logged out successfully');
   };
 
+  const register = async (userData) => {
+    // userData should contain: fullName, email, password, role
+    setLoading(true); // Use the general loading state or a new one for registration
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/auth/register`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(userData),
+      });
+
+      const responseData = await response.json();
+
+      if (!response.ok) {
+        // Handle array-based validation errors
+        if (Array.isArray(responseData)) {
+          const errorMessages = responseData
+            .map(error => error.description)
+            .join('\n');
+          throw new Error(errorMessages);
+        }
+        // Handle object-based validation errors
+        else if (responseData.errors) {
+          const errorMessages = Object.entries(responseData.errors)
+            .map(([field, messages]) => `${field}: ${messages.join(', ')}`)
+            .join('\n');
+          throw new Error(errorMessages);
+        }
+        // Handle other types of errors
+        throw new Error(responseData.message || responseData.error || 'Registration failed');
+      }
+      
+      // Backend might return user info or just a success message.
+      // If it returns user info and logs them in immediately, handle that here.
+      // For now, we assume registration requires separate login or email verification.
+      showSuccess(responseData.message || 'Registration successful! Please check your email for verification or login.');
+      
+      // Navigate to login after successful registration
+      navigate('/login');
+
+      return responseData; // Return the response data for potential further use
+    } catch (error) {
+      // Show the specific error message from the backend
+      showError(error.message);
+      throw error; // Re-throw the error so the component can catch it if needed
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const hasPermission = (permission) => {
     if (!user || !user.permissions) return false;
     return user.permissions.includes(permission);
@@ -134,6 +185,7 @@ export const AuthProvider = ({ children }) => {
     isLoggingIn,
     login,
     logout,
+    register,
     hasPermission,
     hasRole,
     getAuthHeaders,

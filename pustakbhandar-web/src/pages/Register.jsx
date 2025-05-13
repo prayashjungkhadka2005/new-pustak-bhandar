@@ -9,7 +9,7 @@ const Register = () => {
     email: '',
     password: '',
     confirmPassword: '',
-    role: 'member'
+    userType: 'Member'
   });
   const [loading, setLoading] = useState(false);
   const { register } = useAuth();
@@ -93,18 +93,18 @@ const Register = () => {
                   Register as
                 </label>
                 <div className="grid grid-cols-3 gap-2">
-                  {['member', 'staff', 'admin'].map((role) => (
+                  {['Member', 'Staff', 'Admin'].map((type) => (
                     <button
-                      key={role}
+                      key={type}
                       type="button"
-                      onClick={() => setFormData(prev => ({ ...prev, role }))}
+                      onClick={() => setFormData(prev => ({ ...prev, userType: type }))}
                       className={`py-1.5 px-3 rounded-md text-sm font-medium capitalize transition-colors duration-200
-                        ${formData.role === role
+                        ${formData.userType === type
                           ? 'bg-blue-600 text-white'
                           : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                         }`}
                     >
-                      {role}
+                      {type}
                     </button>
                   ))}
                 </div>
