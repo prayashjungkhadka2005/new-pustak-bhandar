@@ -50,6 +50,7 @@ namespace PustakBhandar.DTOs
         public string Email { get; set; } = string.Empty;
         public string FullName { get; set; } = string.Empty;
         public List<string> Permissions { get; set; } = new List<string>();
+        public List<string> Roles { get; set; } = new List<string>();
         public DateTime TokenExpiration { get; set; }
     }
 

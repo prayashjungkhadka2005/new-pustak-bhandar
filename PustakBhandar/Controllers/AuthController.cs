@@ -150,7 +150,8 @@ namespace PustakBhandar.Controllers
                     FullName = user.FullName ?? string.Empty,
                     TokenExpiration = DateTime.UtcNow.AddDays(1),
                     Permissions = permissions,
-                    SessionId = Guid.NewGuid().ToString()
+                    SessionId = Guid.NewGuid().ToString(),
+                    Roles = roles.ToList()
                 });
             }
             catch (Exception ex)
@@ -346,7 +347,8 @@ namespace PustakBhandar.Controllers
                     FullName = user.FullName,
                     TokenExpiration = DateTime.UtcNow.AddDays(1),
                     Permissions = permissions,
-                    SessionId = Guid.NewGuid().ToString()
+                    SessionId = Guid.NewGuid().ToString(),
+                    Roles = roles.ToList()
                 });
             }
             catch (Exception ex)
