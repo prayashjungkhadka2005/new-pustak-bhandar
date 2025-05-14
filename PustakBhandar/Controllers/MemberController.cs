@@ -143,7 +143,7 @@ namespace PustakBhandar.Controllers
             }
         }
 
-        [HttpGet("whitelist")]
+        [HttpGet("wishlist")]
         public async Task<ActionResult<List<WishlistItemResponse>>> GetWishlist()
         {
             try
@@ -156,6 +156,7 @@ namespace PustakBhandar.Controllers
 
                 var wishlistItems = await _context.Wishlists
                     .Include(w => w.Book)
+                        .ThenInclude(b => b.Author)
                     .Where(w => w.MemberId == userId)
                     .OrderByDescending(w => w.AddedAt)
                     .Select(w => new WishlistItemResponse
@@ -179,7 +180,7 @@ namespace PustakBhandar.Controllers
             }
         }
 
-        [HttpPost("whitelist")]
+        [HttpPost("wishlist")]
         public async Task<ActionResult<WishlistItemResponse>> AddToWishlist(AddToWishlistRequest request)
         {
             try
@@ -240,7 +241,7 @@ namespace PustakBhandar.Controllers
             }
         }
 
-        [HttpDelete("whitelist/{bookId}")]
+        [HttpDelete("wishlist/{bookId}")]
         public async Task<ActionResult> RemoveFromWishlist(string bookId)
         {
             try

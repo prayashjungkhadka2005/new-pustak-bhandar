@@ -27,7 +27,6 @@ namespace PustakBhandar.Data
         public DbSet<Wishlist> Wishlists { get; set; }
         public DbSet<Review> Reviews { get; set; }
         public DbSet<Notification> Notifications { get; set; }
-        // Removed Wishlist, WishlistItem
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -91,6 +90,20 @@ namespace PustakBhandar.Data
                 entity.Property(n => n.OrderId).IsRequired();
                 entity.Property(n => n.Message).IsRequired().HasMaxLength(500);
                 entity.Property(n => n.Timestamp).IsRequired();
+            });
+
+            // Configure Wishlist
+            builder.Entity<Wishlist>(entity =>
+            {
+                entity.HasKey(w => w.Id);
+                entity.HasOne(w => w.Member)
+                    .WithMany(m => m.Wishlist)
+                    .HasForeignKey(w => w.MemberId)
+                    .OnDelete(DeleteBehavior.Cascade);
+                entity.HasOne(w => w.Book)
+                    .WithMany(b => b.WishlistEntries)
+                    .HasForeignKey(w => w.BookId)
+                    .OnDelete(DeleteBehavior.Cascade);
             });
         }
     }

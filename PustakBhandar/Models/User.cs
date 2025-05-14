@@ -18,7 +18,7 @@ namespace PustakBhandar.Models
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
         // Navigation properties
-        public virtual Wishlist? Wishlist { get; set; }
+        public virtual ICollection<Wishlist> Wishlist { get; set; } = new List<Wishlist>();
         public virtual ICollection<Review> Reviews { get; set; } = new List<Review>();
         public virtual ICollection<Notification> Notifications { get; set; } = new List<Notification>();
     }

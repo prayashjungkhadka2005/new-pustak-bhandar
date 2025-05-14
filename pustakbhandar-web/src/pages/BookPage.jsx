@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { showError, showSuccess } from '../utils/toast';
@@ -12,8 +12,8 @@ const BookPage = () => {
   const [reviews, setReviews] = useState([]);
   const [relatedBooks, setRelatedBooks] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [wishlist, setWishlist] = useState([]); // For demo, fetch user's wishlist if needed
-  const [cart, setCart] = useState([]); // For demo, fetch user's cart if needed
+  const [wishlist, setWishlist] = useState([]);
+  const [cart, setCart] = useState({ items: [] });
   const [reviewModalOpen, setReviewModalOpen] = useState(false);
   const [reviewForm, setReviewForm] = useState({ rating: 0, comment: '' });
   const [submittingReview, setSubmittingReview] = useState(false);
@@ -92,24 +92,159 @@ const BookPage = () => {
   };
 
   const isInWishlist = wishlist.includes(bookId);
-  const isInCart = cart.find((item) => item.bookId === bookId);
+  const isInCart = cart.items.some(item => item.bookId === bookId);
 
-  const handleAddToWishlist = async () => {
-    // Placeholder logic
-    setWishlist((prev) => [...prev, bookId]);
-    showSuccess('Added to wishlist!');
+  // Fetch user's wishlist and cart
+  const fetchUserData = useCallback(async () => {
+    if (!user) return;
+
+    try {
+      // Fetch wishlist
+      const wishlistRes = await fetch(`${import.meta.env.VITE_API_BASE_URL}/members/wishlist`, {
+        headers: {
+          'Authorization': `Bearer ${user.token}`
+        }
+      });
+      if (wishlistRes.ok) {
+        const wishlistData = await wishlistRes.json();
+        setWishlist(Array.isArray(wishlistData.data) ? wishlistData.data.map(item => item.bookId) : []);
+      }
+
+      // Fetch cart
+      const cartRes = await fetch(`${import.meta.env.VITE_API_BASE_URL}/members/cart`, {
+        headers: {
+          'Authorization': `Bearer ${user.token}`
+        }
+      });
+      if (cartRes.ok) {
+        const cartData = await cartRes.json();
+        setCart(cartData.data);
+      }
+    } catch (err) {
+      console.error('Error fetching user data:', err);
+      setWishlist([]);
+      setCart({ items: [] });
+    }
+  }, [user]);
+
+  // Handle wishlist actions
+  const handleWishlistAction = async () => {
+    if (!user) {
+      showError('Please login to manage wishlist');
+      return;
+    }
+
+    try {
+      const isInWishlist = Array.isArray(wishlist) && wishlist.includes(bookId);
+      
+      console.log('Current wishlist state:', wishlist);
+      console.log('Is in wishlist:', isInWishlist);
+      console.log('Book ID:', bookId);
+
+      const url = `${import.meta.env.VITE_API_BASE_URL}/members/wishlist${isInWishlist ? `/${bookId}` : ''}`;
+      const method = isInWishlist ? 'DELETE' : 'POST';
+
+      console.log('Making request to:', url);
+      console.log('Method:', method);
+
+      const res = await fetch(url, {
+        method,
+        headers: {
+          'Authorization': `Bearer ${user.token}`,
+          'Content-Type': 'application/json'
+        },
+        body: !isInWishlist ? JSON.stringify({ bookId }) : undefined
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        console.error('Wishlist API error:', errorData);
+        throw new Error(errorData.message || 'Failed to update wishlist');
+      }
+
+      // Refresh wishlist data
+      const wishlistRes = await fetch(`${import.meta.env.VITE_API_BASE_URL}/members/wishlist`, {
+        headers: {
+          'Authorization': `Bearer ${user.token}`
+        }
+      });
+
+      if (wishlistRes.ok) {
+        const wishlistData = await wishlistRes.json();
+        setWishlist(Array.isArray(wishlistData.data) ? wishlistData.data.map(item => item.bookId) : []);
+        showSuccess(isInWishlist ? 'Removed from wishlist' : 'Added to wishlist');
+      }
+    } catch (err) {
+      console.error('Wishlist operation error:', err);
+      showError(err.message || 'Could not update wishlist');
+    }
   };
-  const handleRemoveFromWishlist = async () => {
-    setWishlist((prev) => prev.filter((id) => id !== bookId));
-    showSuccess('Removed from wishlist!');
+
+  // Handle cart actions
+  const handleCartAction = async () => {
+    if (!user) {
+      showError('Please login to add to cart');
+      return;
+    }
+
+    try {
+      const isInCart = Array.isArray(cart?.items) && cart.items.some(item => item.bookId === bookId);
+      const cartItem = isInCart ? cart.items.find(item => item.bookId === bookId) : null;
+      
+      console.log('Current cart state:', cart);
+      console.log('Is in cart:', isInCart);
+      console.log('Cart item:', cartItem);
+
+      let url, method, body;
+
+      if (isInCart) {
+        // Remove from cart
+        url = `${import.meta.env.VITE_API_BASE_URL}/members/cart/${cartItem.id}`;
+        method = 'DELETE';
+      } else {
+        // Add to cart
+        url = `${import.meta.env.VITE_API_BASE_URL}/members/cart`;
+        method = 'POST';
+        body = JSON.stringify({ bookId, quantity: 1 });
+      }
+
+      const res = await fetch(url, {
+        method,
+        headers: {
+          'Authorization': `Bearer ${user.token}`,
+          'Content-Type': 'application/json'
+        },
+        body
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        console.error('Cart API error:', errorData);
+        throw new Error(errorData.message || 'Failed to update cart');
+      }
+
+      // Refresh cart data
+      const cartRes = await fetch(`${import.meta.env.VITE_API_BASE_URL}/members/cart`, {
+        headers: {
+          'Authorization': `Bearer ${user.token}`
+        }
+      });
+
+      if (cartRes.ok) {
+        const cartData = await cartRes.json();
+        setCart(cartData.data);
+        showSuccess(isInCart ? 'Removed from cart' : 'Added to cart');
+      }
+    } catch (err) {
+      console.error('Cart operation error:', err);
+      showError(err.message || 'Could not update cart');
+    }
   };
-  const handleAddToCart = async () => {
-    setCart((prev) => [...prev, { bookId, quantity: 1 }]);
-    showSuccess('Added to cart!');
-  };
-  const handleUpdateCart = async () => {
-    showSuccess('Cart updated!');
-  };
+
+  useEffect(() => {
+    fetchUserData();
+  }, [fetchUserData]);
+
   const handleWriteReview = async (e) => {
     e.preventDefault();
     setSubmittingReview(true);
@@ -191,68 +326,49 @@ const BookPage = () => {
               </div>
             </div>
             {/* Pricing & Actions */}
-            <div className="mt-6 flex flex-col gap-4">
-              {/* Pricing */}
-              <div className="flex items-center gap-4">
+            <div className="mt-8 flex flex-col gap-4">
+              <div className="flex items-baseline gap-4">
                 {book.onSale && book.discountPercentage ? (
                   <>
-                    <span className="text-lg text-gray-400 line-through">{formatCurrency(book.price)}</span>
-                    <span className="text-2xl font-bold text-blue-700">
+                    <span className="text-2xl font-bold text-gray-900">
                       {formatCurrency(calculateDiscountedPrice(book.price, book.discountPercentage))}
                     </span>
-                    <span className="text-sm text-red-600 font-semibold">{book.discountPercentage}% OFF</span>
+                    <span className="text-lg text-gray-500 line-through">
+                      {formatCurrency(book.price)}
+                    </span>
                   </>
                 ) : (
-                  <span className="text-2xl font-bold text-blue-700">{formatCurrency(book.price)}</span>
+                  <span className="text-2xl font-bold text-gray-900">
+                    {formatCurrency(book.price)}
+                  </span>
                 )}
               </div>
-              {/* Action Buttons */}
-              <div className="flex gap-4 flex-wrap">
-                {!book.onSale ? (
+              {user && (
+                <div className="flex gap-4">
                   <button
-                    disabled
-                    className="px-4 py-2 bg-gray-300 text-gray-500 rounded cursor-not-allowed flex items-center gap-2"
+                    onClick={handleCartAction}
+                    disabled={!book.onSale || book.quantity <= 0}
+                    className={`flex-1 px-4 py-2 rounded-lg flex items-center justify-center gap-2 ${
+                      Array.isArray(cart?.items) && cart.items.some(item => item.bookId === bookId)
+                        ? 'bg-red-100 text-red-600 hover:bg-red-200'
+                        : 'bg-blue-600 text-white hover:bg-blue-700'
+                    } ${(!book.onSale || book.quantity <= 0) ? 'opacity-50 cursor-not-allowed' : ''}`}
                   >
-                    <ShoppingCartIcon className="h-5 w-5" /> Not Available for Purchase
+                    <ShoppingCartIcon className="h-5 w-5" />
+                    {Array.isArray(cart?.items) && cart.items.some(item => item.bookId === bookId) ? 'Remove from Cart' : 'Add to Cart'}
                   </button>
-                ) : !user ? (
-                  <Link to="/login" className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 flex items-center gap-2">
-                    <ShoppingCartIcon className="h-5 w-5" /> Login to Purchase
-                  </Link>
-                ) : book.quantity <= 0 ? (
                   <button
-                    disabled
-                    className="px-4 py-2 bg-gray-300 text-gray-500 rounded cursor-not-allowed flex items-center gap-2"
+                    onClick={handleWishlistAction}
+                    className={`px-4 py-2 rounded-lg flex items-center justify-center ${
+                      Array.isArray(wishlist) && wishlist.includes(bookId)
+                        ? 'bg-red-100 text-red-600 hover:bg-red-200'
+                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                    }`}
                   >
-                    <ShoppingCartIcon className="h-5 w-5" /> Out of Stock
+                    <HeartIcon className="h-5 w-5" />
                   </button>
-                ) : (
-                  <>
-                    <button
-                      className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 flex items-center gap-2"
-                      onClick={isInCart ? handleUpdateCart : handleAddToCart}
-                    >
-                      <ShoppingCartIcon className="h-5 w-5" />
-                      {isInCart ? 'Update Quantity' : 'Add to Cart'}
-                    </button>
-                    {isInWishlist ? (
-                      <button
-                        className="px-4 py-2 bg-red-100 text-red-600 rounded hover:bg-red-200 flex items-center gap-2"
-                        onClick={handleRemoveFromWishlist}
-                      >
-                        <HeartIcon className="h-5 w-5" /> Remove from Wishlist
-                      </button>
-                    ) : (
-                      <button
-                        className="px-4 py-2 bg-gray-100 text-gray-700 rounded hover:bg-gray-200 flex items-center gap-2"
-                        onClick={handleAddToWishlist}
-                      >
-                        <HeartIcon className="h-5 w-5" /> Add to Wishlist
-                      </button>
-                    )}
-                  </>
-                )}
-              </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
