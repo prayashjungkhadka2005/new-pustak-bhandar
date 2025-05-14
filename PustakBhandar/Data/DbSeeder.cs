@@ -9,15 +9,18 @@ namespace PustakBhandar.Data
         private readonly ApplicationDbContext _context;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
+        private readonly IWebHostEnvironment _environment;
 
         public DbSeeder(
             ApplicationDbContext context,
             UserManager<ApplicationUser> userManager,
-            RoleManager<IdentityRole> roleManager)
+            RoleManager<IdentityRole> roleManager,
+            IWebHostEnvironment environment)
         {
             _context = context;
             _userManager = userManager;
             _roleManager = roleManager;
+            _environment = environment;
         }
 
         public async Task SeedAsync()
@@ -28,6 +31,9 @@ namespace PustakBhandar.Data
             // Create users if they don't exist
             await CreateUsersAsync();
 
+            // Create authors, genres, and publishers
+            await CreateBaseDataAsync();
+
             // Create books if they don't exist
             await CreateBooksAsync();
 
@@ -37,8 +43,8 @@ namespace PustakBhandar.Data
             // Create announcements if they don't exist
             await CreateAnnouncementsAsync();
 
-            // Create orders if they don't exist
-            await CreateOrdersAsync();
+            // Create sample orders and reviews
+            await CreateOrdersAndReviewsAsync();
         }
 
         private async Task CreateRolesAsync()
@@ -63,7 +69,8 @@ namespace PustakBhandar.Data
                 Email = "admin@pustakbhandar.com",
                 FullName = "Admin User",
                 EmailConfirmed = true,
-                CreatedAt = DateTime.UtcNow
+                CreatedAt = DateTime.UtcNow,
+                PhoneNumber = "+1234567890"
             };
 
             if (await _userManager.FindByEmailAsync(admin.Email) == null)
@@ -82,7 +89,8 @@ namespace PustakBhandar.Data
                 Email = "staff@pustakbhandar.com",
                 FullName = "Staff User",
                 EmailConfirmed = true,
-                CreatedAt = DateTime.UtcNow
+                CreatedAt = DateTime.UtcNow,
+                PhoneNumber = "+1234567891"
             };
 
             if (await _userManager.FindByEmailAsync(staff.Email) == null)
@@ -94,51 +102,99 @@ namespace PustakBhandar.Data
                 }
             }
 
-            // Create Member
-            var member = new Member
+            // Create Members
+            var members = new List<Member>
             {
-                UserName = "member@pustakbhandar.com",
-                Email = "member@pustakbhandar.com",
-                FullName = "Test Member",
-                EmailConfirmed = true,
-                CreatedAt = DateTime.UtcNow,
-                JoinDate = DateTime.UtcNow,
-                TotalOrders = 0,
-                DiscountEarned = 0
+                new Member
+                {
+                    UserName = "member1@pustakbhandar.com",
+                    Email = "member1@pustakbhandar.com",
+                    FullName = "John Doe",
+                    EmailConfirmed = true,
+                    CreatedAt = DateTime.UtcNow,
+                    JoinDate = DateTime.UtcNow,
+                    TotalOrders = 0,
+                    DiscountEarned = 0,
+                    PhoneNumber = "+1234567892"
+                },
+                new Member
+                {
+                    UserName = "member2@pustakbhandar.com",
+                    Email = "member2@pustakbhandar.com",
+                    FullName = "Jane Smith",
+                    EmailConfirmed = true,
+                    CreatedAt = DateTime.UtcNow,
+                    JoinDate = DateTime.UtcNow,
+                    TotalOrders = 0,
+                    DiscountEarned = 0,
+                    PhoneNumber = "+1234567893"
+                }
             };
 
-            if (await _userManager.FindByEmailAsync(member.Email) == null)
+            foreach (var member in members)
             {
-                var result = await _userManager.CreateAsync(member, "Member@123");
-                if (result.Succeeded)
+                if (await _userManager.FindByEmailAsync(member.Email) == null)
                 {
-                    await _userManager.AddToRoleAsync(member, "Member");
+                    var result = await _userManager.CreateAsync(member, "Member@123");
+                    if (result.Succeeded)
+                    {
+                        await _userManager.AddToRoleAsync(member, "Member");
+                    }
                 }
             }
+        }
+
+        private async Task CreateBaseDataAsync()
+        {
+            if (!await _context.Authors.AnyAsync())
+            {
+                var authors = new List<Author>
+                {
+                    new Author { Id = Guid.NewGuid().ToString(), Name = "J.K. Rowling" },
+                    new Author { Id = Guid.NewGuid().ToString(), Name = "George R.R. Martin" },
+                    new Author { Id = Guid.NewGuid().ToString(), Name = "Stephen King" },
+                    new Author { Id = Guid.NewGuid().ToString(), Name = "Agatha Christie" }
+                };
+                await _context.Authors.AddRangeAsync(authors);
+            }
+
+            if (!await _context.Genres.AnyAsync())
+            {
+                var genres = new List<Genre>
+                {
+                    new Genre { Id = Guid.NewGuid().ToString(), Name = "Fantasy" },
+                    new Genre { Id = Guid.NewGuid().ToString(), Name = "Science Fiction" },
+                    new Genre { Id = Guid.NewGuid().ToString(), Name = "Horror" },
+                    new Genre { Id = Guid.NewGuid().ToString(), Name = "Mystery" },
+                    new Genre { Id = Guid.NewGuid().ToString(), Name = "Romance" },
+                    new Genre { Id = Guid.NewGuid().ToString(), Name = "Thriller" }
+                };
+                await _context.Genres.AddRangeAsync(genres);
+            }
+
+            if (!await _context.Publishers.AnyAsync())
+            {
+                var publishers = new List<Publisher>
+                {
+                    new Publisher { Id = Guid.NewGuid().ToString(), Name = "Bloomsbury" },
+                    new Publisher { Id = Guid.NewGuid().ToString(), Name = "Bantam Books" },
+                    new Publisher { Id = Guid.NewGuid().ToString(), Name = "Penguin Books" },
+                    new Publisher { Id = Guid.NewGuid().ToString(), Name = "HarperCollins" }
+                };
+                await _context.Publishers.AddRangeAsync(publishers);
+            }
+
+            await _context.SaveChangesAsync();
         }
 
         private async Task CreateBooksAsync()
         {
             if (!await _context.Books.AnyAsync())
             {
-                // Create Authors
-                var author1 = new Author { Id = Guid.NewGuid().ToString(), Name = "J.K. Rowling" };
-                var author2 = new Author { Id = Guid.NewGuid().ToString(), Name = "George R.R. Martin" };
-                await _context.Authors.AddRangeAsync(author1, author2);
+                var authors = await _context.Authors.ToListAsync();
+                var genres = await _context.Genres.ToListAsync();
+                var publishers = await _context.Publishers.ToListAsync();
 
-                // Create Genres
-                var genre1 = new Genre { Id = Guid.NewGuid().ToString(), Name = "Fantasy" };
-                var genre2 = new Genre { Id = Guid.NewGuid().ToString(), Name = "Science Fiction" };
-                await _context.Genres.AddRangeAsync(genre1, genre2);
-
-                // Create Publishers
-                var publisher1 = new Publisher { Id = Guid.NewGuid().ToString(), Name = "Bloomsbury" };
-                var publisher2 = new Publisher { Id = Guid.NewGuid().ToString(), Name = "Bantam Books" };
-                await _context.Publishers.AddRangeAsync(publisher1, publisher2);
-
-                await _context.SaveChangesAsync();
-
-                // Create Books
                 var books = new List<Book>
                 {
                     new Book
@@ -146,9 +202,9 @@ namespace PustakBhandar.Data
                         Id = Guid.NewGuid().ToString(),
                         Title = "Harry Potter and the Philosopher's Stone",
                         ISBN = "9780747532743",
-                        AuthorId = author1.Id,
-                        GenreId = genre1.Id,
-                        PublisherId = publisher1.Id,
+                        AuthorId = authors.First(a => a.Name == "J.K. Rowling").Id,
+                        GenreId = genres.First(g => g.Name == "Fantasy").Id,
+                        PublisherId = publishers.First(p => p.Name == "Bloomsbury").Id,
                         Format = "Hardcover",
                         Price = 29.99m,
                         PublicationDate = DateTime.SpecifyKind(new DateTime(1997, 6, 26), DateTimeKind.Utc),
@@ -156,16 +212,17 @@ namespace PustakBhandar.Data
                         CreatedAt = DateTime.UtcNow,
                         UpdatedAt = DateTime.UtcNow,
                         Rating = 4.5m,
-                        OnSale = false
+                        OnSale = false,
+                        CoverImageUrl = "/images/books/harry-potter-1.jpg"
                     },
                     new Book
                     {
                         Id = Guid.NewGuid().ToString(),
                         Title = "A Game of Thrones",
                         ISBN = "9780553103540",
-                        AuthorId = author2.Id,
-                        GenreId = genre1.Id,
-                        PublisherId = publisher2.Id,
+                        AuthorId = authors.First(a => a.Name == "George R.R. Martin").Id,
+                        GenreId = genres.First(g => g.Name == "Fantasy").Id,
+                        PublisherId = publishers.First(p => p.Name == "Bantam Books").Id,
                         Format = "Paperback",
                         Price = 24.99m,
                         PublicationDate = DateTime.SpecifyKind(new DateTime(1996, 8, 1), DateTimeKind.Utc),
@@ -173,7 +230,26 @@ namespace PustakBhandar.Data
                         CreatedAt = DateTime.UtcNow,
                         UpdatedAt = DateTime.UtcNow,
                         Rating = 4.7m,
-                        OnSale = true
+                        OnSale = true,
+                        CoverImageUrl = "/images/books/game-of-thrones.jpg"
+                    },
+                    new Book
+                    {
+                        Id = Guid.NewGuid().ToString(),
+                        Title = "The Shining",
+                        ISBN = "9780385121675",
+                        AuthorId = authors.First(a => a.Name == "Stephen King").Id,
+                        GenreId = genres.First(g => g.Name == "Horror").Id,
+                        PublisherId = publishers.First(p => p.Name == "Penguin Books").Id,
+                        Format = "Paperback",
+                        Price = 19.99m,
+                        PublicationDate = DateTime.SpecifyKind(new DateTime(1977, 1, 28), DateTimeKind.Utc),
+                        Quantity = 25,
+                        CreatedAt = DateTime.UtcNow,
+                        UpdatedAt = DateTime.UtcNow,
+                        Rating = 4.3m,
+                        OnSale = true,
+                        CoverImageUrl = "/images/books/the-shining.jpg"
                     }
                 };
 
@@ -210,6 +286,17 @@ namespace PustakBhandar.Data
                             Percentage = 10.00m,
                             StartDate = DateTime.UtcNow,
                             EndDate = DateTime.UtcNow.AddYears(1),
+                            IsActive = true,
+                            CreatedAt = DateTime.UtcNow
+                        },
+                        new Discount
+                        {
+                            Id = Guid.NewGuid().ToString(),
+                            AdminId = admin.Id,
+                            Description = "Holiday Special - 15% off on all fantasy books",
+                            Percentage = 15.00m,
+                            StartDate = DateTime.UtcNow,
+                            EndDate = DateTime.UtcNow.AddMonths(2),
                             IsActive = true,
                             CreatedAt = DateTime.UtcNow
                         }
@@ -253,6 +340,18 @@ namespace PustakBhandar.Data
                             EndDate = DateTime.UtcNow.AddMonths(1),
                             IsActive = true,
                             CreatedAt = DateTime.UtcNow
+                        },
+                        new Announcement
+                        {
+                            Id = Guid.NewGuid().ToString(),
+                            AdminId = admin.Id,
+                            Title = "New Arrivals",
+                            Message = "Check out our latest collection of books!",
+                            Type = "News",
+                            StartDate = DateTime.UtcNow,
+                            EndDate = DateTime.UtcNow.AddMonths(2),
+                            IsActive = true,
+                            CreatedAt = DateTime.UtcNow
                         }
                     };
 
@@ -262,42 +361,44 @@ namespace PustakBhandar.Data
             }
         }
 
-        private async Task CreateOrdersAsync()
+        private async Task CreateOrdersAndReviewsAsync()
         {
             if (!await _context.Orders.AnyAsync())
             {
-                var member = await _userManager.FindByEmailAsync("member@pustakbhandar.com");
-                var staff = await _userManager.FindByEmailAsync("staff@pustakbhandar.com");
-                var book = await _context.Books.FirstOrDefaultAsync();
-                if (member != null && staff != null && book != null)
+                var member = await _userManager.FindByEmailAsync("member1@pustakbhandar.com") as Member;
+                var books = await _context.Books.Take(2).ToListAsync();
+
+                if (member != null && books.Any())
                 {
                     var order = new Order
                     {
                         Id = Guid.NewGuid().ToString(),
                         MemberId = member.Id,
-                        ClaimCode = "ABC123",
-                        TotalAmount = book.Price * 2,
-                        DiscountApplied = 10,
+                        OrderDate = DateTime.UtcNow.AddDays(-5),
+                        TotalAmount = books.Sum(b => b.Price),
                         Status = "Completed",
-                        OrderDate = DateTime.UtcNow,
-                        ProcessedByStaffId = staff.Id
+                        ClaimCode = Guid.NewGuid().ToString("N").Substring(0, 8),
+                        Items = books.Select(b => new OrderItem
+                        {
+                            BookId = b.Id,
+                            Quantity = 1,
+                            Price = b.Price
+                        }).ToList()
                     };
 
-                    // Create and add order items
-                    var orderItem = new OrderItem
+                    await _context.Orders.AddAsync(order);
+
+                    // Add reviews
+                    var reviews = books.Select(b => new Review
                     {
-                        OrderId = order.Id,
-                        BookId = book.Id,
-                        Price = book.Price,
-                        Quantity = 2
-                    };
+                        Id = Guid.NewGuid().ToString(),
+                        BookId = b.Id,
+                        MemberId = member.Id,
+                        Rating = 5,
+                        Comment = "Great book! Highly recommended."
+                    });
 
-                    // Add the order first
-                    _context.Orders.Add(order);
-                    await _context.SaveChangesAsync();
-
-                    // Then add the order item
-                    _context.OrderItems.Add(orderItem);
+                    await _context.Reviews.AddRangeAsync(reviews);
                     await _context.SaveChangesAsync();
                 }
             }

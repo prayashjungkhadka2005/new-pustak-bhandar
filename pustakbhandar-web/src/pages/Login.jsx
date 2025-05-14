@@ -31,11 +31,11 @@ const Login = () => {
       if (response.roles.includes('Staff')) {
         navigate('/staff/orders');
       } else if (response.roles.includes('Admin')) {
-        navigate('/admin/dashboard');
+          navigate('/admin/dashboard');
       } else if (response.roles.includes('Member')) {
-        navigate('/member/dashboard');
+          navigate('/member/dashboard');
       } else {
-        navigate('/');
+          navigate('/');
       }
     } catch (error) {
       showError(error.message || 'Login failed');

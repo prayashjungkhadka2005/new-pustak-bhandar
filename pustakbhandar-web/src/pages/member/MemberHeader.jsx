@@ -178,11 +178,11 @@ const MemberHeader = () => {
                             <span className="text-xl">{getNotificationIcon(n.type)}</span>
                             <div className="flex-1">
                               <div className="text-sm text-[#232946]">{n.message}</div>
-                              {n.timestamp && (
+                          {n.timestamp && (
                                 <div className="text-xs text-[#6B7280] mt-1">
                                   {new Date(n.timestamp).toLocaleString()}
                                 </div>
-                              )}
+                          )}
                             </div>
                             {!n.isRead && (
                               <button

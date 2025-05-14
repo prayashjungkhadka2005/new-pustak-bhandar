@@ -48,47 +48,47 @@ function App() {
     <Router>
       <AuthProvider>
         <div className="min-h-screen flex flex-col">
-          <Toaster
-            position="top-right"
-            reverseOrder={false}
-            toastOptions={{
-              duration: 3000,
+        <Toaster
+          position="top-right"
+          reverseOrder={false}
+          toastOptions={{
+            duration: 3000,
+            style: {
+              fontSize: '1rem',
+              borderRadius: '8px',
+              background: '#fff',
+              color: '#333',
+              boxShadow: '0 4px 24px rgba(0,0,0,0.08)',
+              padding: '16px',
+              maxWidth: '400px',
+            },
+            success: {
+              iconTheme: {
+                primary: '#2563eb',
+                secondary: '#fff',
+              },
               style: {
-                fontSize: '1rem',
-                borderRadius: '8px',
-                background: '#fff',
-                color: '#333',
-                boxShadow: '0 4px 24px rgba(0,0,0,0.08)',
-                padding: '16px',
-                maxWidth: '400px',
+                border: '1px solid #2563eb',
               },
-              success: {
-                iconTheme: {
-                  primary: '#2563eb',
-                  secondary: '#fff',
-                },
-                style: {
-                  border: '1px solid #2563eb',
-                },
+            },
+            error: {
+              iconTheme: {
+                primary: '#ef4444',
+                secondary: '#fff',
               },
-              error: {
-                iconTheme: {
-                  primary: '#ef4444',
-                  secondary: '#fff',
-                },
-                style: {
-                  border: '1px solid #ef4444',
-                },
+              style: {
+                border: '1px solid #ef4444',
               },
-            }}
-            containerStyle={{
-              top: 24,
-              right: 24,
-            }}
-            limit={1}
-          />
+            },
+          }}
+          containerStyle={{
+            top: 24,
+            right: 24,
+          }}
+          limit={1}
+        />
           <main className="flex-grow">
-            <Routes>
+        <Routes>
               {/* Public Routes with Navbar and Footer */}
               <Route
                 path="/"
@@ -155,32 +155,32 @@ function App() {
                 }
               />
 
-              {/* Protected Admin Routes */}
-              <Route
-                path="/admin"
-                element={
-                  <PermissionRoute permission={Permissions.MANAGE_USERS}>
-                    <AdminLayout />
-                  </PermissionRoute>
-                }
-              >
-                <Route index element={<Navigate to="dashboard" replace />} />
-                <Route path="dashboard" element={<Dashboard />} />
-                <Route path="books/add" element={<AddBook />} />
-                <Route path="discounts" element={<DiscountPage />} />
-                <Route path="announcements" element={<AnnouncementPage />} />
-                <Route path="orders" element={<OrderPage />} />
-                <Route path="users" element={<UserManagementPage />} />
-              </Route>
+          {/* Protected Admin Routes */}
+          <Route
+            path="/admin"
+            element={
+              <PermissionRoute permission={Permissions.MANAGE_USERS}>
+                <AdminLayout />
+              </PermissionRoute>
+            }
+          >
+            <Route index element={<Navigate to="dashboard" replace />} />
+            <Route path="dashboard" element={<Dashboard />} />
+            <Route path="books/add" element={<AddBook />} />
+            <Route path="discounts" element={<DiscountPage />} />
+            <Route path="announcements" element={<AnnouncementPage />} />
+            <Route path="orders" element={<OrderPage />} />
+            <Route path="users" element={<UserManagementPage />} />
+          </Route>
 
-              {/* Protected Staff Routes */}
-              <Route
+          {/* Protected Staff Routes */}
+          <Route
                 path="/staff"
-                element={
-                  <PermissionRoute permission={Permissions.VIEW_ORDERS}>
+            element={
+              <PermissionRoute permission={Permissions.VIEW_ORDERS}>
                     <StaffLayout />
-                  </PermissionRoute>
-                }
+              </PermissionRoute>
+            }
               >
                 <Route index element={<Navigate to="orders" replace />} />
                 <Route path="orders" element={<OrdersPage />} />
@@ -189,23 +189,23 @@ function App() {
               </Route>
 
               {/* Protected Member Routes */}
-              <Route
-                path="/member"
-                element={
-                  <PermissionRoute permission={Permissions.VIEW_SELF_DASHBOARD}>
-                    <MemberLayout />
-                  </PermissionRoute>
-                }
-              >
-                <Route index element={<Navigate to="dashboard" replace />} />
-                <Route path="dashboard" element={<MemberDashboard />} />
-                <Route path="profile" element={<ProfilePage />} />
+          <Route
+            path="/member"
+            element={
+              <PermissionRoute permission={Permissions.VIEW_SELF_DASHBOARD}>
+                <MemberLayout />
+              </PermissionRoute>
+            }
+          >
+            <Route index element={<Navigate to="dashboard" replace />} />
+            <Route path="dashboard" element={<MemberDashboard />} />
+            <Route path="profile" element={<ProfilePage />} />
                 <Route path="orders" element={<MemberOrdersPage />} />
-                <Route path="cart" element={<CartPage />} />
-                <Route path="wishlist" element={<WishlistPage />} />
-                <Route path="reviews" element={<ReviewsPage />} />
-              </Route>
-            </Routes>
+            <Route path="cart" element={<CartPage />} />
+            <Route path="wishlist" element={<WishlistPage />} />
+            <Route path="reviews" element={<ReviewsPage />} />
+          </Route>
+        </Routes>
           </main>
         </div>
       </AuthProvider>

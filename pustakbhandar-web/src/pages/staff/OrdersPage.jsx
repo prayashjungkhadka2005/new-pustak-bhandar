@@ -22,11 +22,11 @@ const OrdersPage = () => {
       const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/staff/orders`, {
         headers: getAuthHeaders(),
       });
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.message || 'Failed to fetch orders');
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.message || 'Failed to fetch orders');
       
-      // Ensure data is an array
-      setOrders(Array.isArray(data) ? data : []);
+      // Handle the response structure correctly
+      setOrders(Array.isArray(result.data) ? result.data : []);
     } catch (error) {
       showError(error.message);
       setOrders([]); // Set empty array on error
@@ -41,13 +41,19 @@ const OrdersPage = () => {
 
   const handleProcessOrder = async (orderId, status) => {
     try {
+      const order = orders.find(o => o.id === orderId);
+      if (!order) throw new Error('Order not found');
+
       const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/staff/orders/${orderId}/process`, {
         method: 'PUT',
         headers: {
           ...getAuthHeaders(),
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ status }),
+        body: JSON.stringify({ 
+          status,
+          claimCode: status === 'Completed' ? order.claimCode : undefined 
+        }),
       });
 
       const data = await response.json();
@@ -153,8 +159,8 @@ const OrdersPage = () => {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       <div>
-                        <div className="font-medium text-gray-900">{order.member.name}</div>
-                        <div className="text-gray-500">{order.member.email}</div>
+                        <div className="font-medium text-gray-900">{order.memberName}</div>
+                        <div className="text-gray-500">{order.memberEmail}</div>
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
@@ -221,8 +227,8 @@ const OrdersPage = () => {
                 </div>
                 <div>
                   <h3 className="text-sm font-medium text-gray-500">Member</h3>
-                  <p className="mt-1 text-sm text-gray-900">{selectedOrder.member.name}</p>
-                  <p className="text-sm text-gray-500">{selectedOrder.member.email}</p>
+                  <p className="mt-1 text-sm text-gray-900">{selectedOrder.memberName}</p>
+                  <p className="text-sm text-gray-500">{selectedOrder.memberEmail}</p>
                 </div>
                 <div>
                   <h3 className="text-sm font-medium text-gray-500">Order Date</h3>
