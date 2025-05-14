@@ -24,14 +24,12 @@ const CartPage = () => {
       const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/members/cart`, { headers });
       const data = await res.json();
       if (res.ok) {
-        // Handle both array and object responses
-        if (Array.isArray(data)) {
-          setCart({ items: data, totalAmount: data.reduce((sum, item) => sum + item.subtotal, 0), discountApplied: 0 });
-        } else if (data.data && Array.isArray(data.data)) {
-          setCart({ 
-            items: data.data, 
-            totalAmount: data.data.reduce((sum, item) => sum + item.subtotal, 0), 
-            discountApplied: data.discountApplied || 0 
+        // Handle the API response structure
+        if (data.data) {
+          setCart({
+            items: data.data.items || [],
+            totalAmount: data.data.totalAmount || 0,
+            discountApplied: 0
           });
         } else {
           setCart({ items: [], totalAmount: 0, discountApplied: 0 });
@@ -87,7 +85,6 @@ const CartPage = () => {
   };
 
   const removeItem = async (itemId) => {
-    if (!window.confirm('Are you sure you want to remove this item from your cart?')) return;
     try {
       const headers = getAuthHeaders();
       const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/members/cart/${itemId}`, {
@@ -108,8 +105,36 @@ const CartPage = () => {
     return (subtotal - discount).toFixed(2);
   };
 
-  const handleProceedToOrder = () => {
-    navigate('/member/checkout');
+  const handleProceedToOrder = async () => {
+    try {
+      const headers = getAuthHeaders();
+      const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/members/orders`, {
+        method: 'POST',
+        headers: {
+          ...headers,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          totalAmount: calculateTotal(),
+          items: cart.items.map(item => ({
+            bookId: item.bookId,
+            quantity: item.quantity,
+            price: item.price
+          }))
+        }),
+      });
+
+      if (res.ok) {
+        // Clear the cart after successful order
+        await fetchCart();
+        // Navigate to orders page
+        navigate('/member/orders');
+      } else {
+        setError('Failed to create order. Please try again.');
+      }
+    } catch (err) {
+      setError('Failed to create order. Please try again.');
+    }
   };
 
   if (loading) {

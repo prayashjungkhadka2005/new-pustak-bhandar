@@ -9,7 +9,7 @@ const WishlistPage = () => {
   const [wishlist, setWishlist] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [cartItems, setCartItems] = useState([]);
+  const [cart, setCart] = useState({ items: [] });
 
   useEffect(() => {
     fetchWishlist();
@@ -21,7 +21,7 @@ const WishlistPage = () => {
     setError(null);
     try {
       const headers = getAuthHeaders();
-      const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/members/whitelist`, { headers });
+      const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/members/wishlist`, { headers });
       const data = await res.json();
       if (res.ok) {
         // Handle both array and object responses
@@ -45,22 +45,18 @@ const WishlistPage = () => {
       const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/members/cart`, { headers });
       const data = await res.json();
       if (res.ok) {
-        // Handle both array and object responses
-        const items = Array.isArray(data) ? data : (data.data || []);
-        setCartItems(items);
+        setCart(data.data || { items: [] });
       }
     } catch (err) {
       console.error('Failed to fetch cart:', err);
-      setCartItems([]);
+      setCart({ items: [] });
     }
   };
 
   const removeFromWishlist = async (bookId) => {
-    if (!window.confirm('Are you sure you want to remove this book from your wishlist?')) return;
-    
     try {
       const headers = getAuthHeaders();
-      const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/members/whitelist/${bookId}`, {
+      const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/members/wishlist/${bookId}`, {
         method: 'DELETE',
         headers,
       });
@@ -98,7 +94,7 @@ const WishlistPage = () => {
   };
 
   const isInCart = (bookId) => {
-    return cartItems.some(item => item.bookId === bookId);
+    return Array.isArray(cart?.items) && cart.items.some(item => item.bookId === bookId);
   };
 
   if (loading) {

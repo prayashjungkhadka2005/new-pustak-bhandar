@@ -25,7 +25,7 @@ const MemberDashboard = () => {
           fetch(`${import.meta.env.VITE_API_BASE_URL}/members/profile`, { headers }),
           fetch(`${import.meta.env.VITE_API_BASE_URL}/members/orders`, { headers }),
           fetch(`${import.meta.env.VITE_API_BASE_URL}/members/cart`, { headers }),
-          fetch(`${import.meta.env.VITE_API_BASE_URL}/members/whitelist`, { headers }),
+          fetch(`${import.meta.env.VITE_API_BASE_URL}/members/wishlist`, { headers }),
           fetch(`${import.meta.env.VITE_API_BASE_URL}/members/notifications`, { headers }),
         ]);
         const [profileData, ordersData, cartData, wishlistData, notificationsData] = await Promise.all([
