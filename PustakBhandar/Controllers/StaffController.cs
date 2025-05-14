@@ -5,6 +5,7 @@ using PustakBhandar.Data;
 using PustakBhandar.DTOs;
 using PustakBhandar.Models;
 using System.Security.Claims;
+using Microsoft.AspNetCore.SignalR;
 
 namespace PustakBhandar.Controllers
 {
@@ -15,11 +16,16 @@ namespace PustakBhandar.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly ILogger<StaffController> _logger;
+        private readonly IHubContext<NotificationHub> _hubContext;
 
-        public StaffController(ApplicationDbContext context, ILogger<StaffController> logger)
+        public StaffController(
+            ApplicationDbContext context, 
+            ILogger<StaffController> logger,
+            IHubContext<NotificationHub> hubContext)
         {
             _context = context;
             _logger = logger;
+            _hubContext = hubContext;
         }
 
         // GET: /api/staff/orders
@@ -82,6 +88,43 @@ namespace PustakBhandar.Controllers
             order.Status = "Confirmed";
             order.ProcessedByStaffId = staffId;
             await _context.SaveChangesAsync();
+
+            // Check if member has reached 10 orders
+            var member = await _context.Users
+                .OfType<Member>()
+                .FirstOrDefaultAsync(m => m.Id == order.MemberId);
+
+            if (member != null)
+            {
+                var completedOrders = await _context.Orders
+                    .CountAsync(o => o.MemberId == member.Id && o.Status == "Confirmed");
+
+                if (completedOrders == 10)
+                {
+                    // Create discount alert notification
+                    var notification = new Notification
+                    {
+                        MemberId = member.Id,
+                        OrderId = null,
+                        Message = "Congratulations! You have earned a 10% stackable discount for completing 10 orders.",
+                        Type = "Discount Alert",
+                        Timestamp = DateTime.UtcNow,
+                        IsRead = false
+                    };
+
+                    _context.Notifications.Add(notification);
+
+                    // Send real-time notification for discount alert
+                    await _hubContext.Clients.User(member.Id).SendAsync("ReceiveNotification", new
+                    {
+                        message = "Congratulations! You have earned a 10% stackable discount for completing 10 orders.",
+                        type = "Discount Alert",
+                        timestamp = DateTime.UtcNow
+                    });
+
+                    await _context.SaveChangesAsync();
+                }
+            }
 
             return Ok(new { status = 200, message = "Order processed successfully" });
         }

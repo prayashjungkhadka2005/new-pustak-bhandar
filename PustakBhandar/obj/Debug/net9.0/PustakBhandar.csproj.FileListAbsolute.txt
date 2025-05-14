@@ -182,3 +182,5 @@ D:\Prayash Drive\Application Development\PustakBhandar\obj\Debug\net9.0\refint\P
 D:\Prayash Drive\Application Development\PustakBhandar\obj\Debug\net9.0\PustakBhandar.pdb
 D:\Prayash Drive\Application Development\PustakBhandar\obj\Debug\net9.0\PustakBhandar.genruntimeconfig.cache
 D:\Prayash Drive\Application Development\PustakBhandar\obj\Debug\net9.0\ref\PustakBhandar.dll
+D:\Prayash Drive\Application Development\PustakBhandar\bin\Debug\net9.0\Newtonsoft.Json.dll
+D:\Prayash Drive\Application Development\PustakBhandar\bin\Debug\net9.0\System.Net.WebSockets.WebSocketProtocol.dll

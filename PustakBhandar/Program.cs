@@ -56,6 +56,22 @@ builder.Services.AddAuthentication(options =>
             IssuerSigningKey = new SymmetricSecurityKey(
             System.Text.Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"] ?? throw new InvalidOperationException("JWT Key not found")))
         };
+
+        // Configure SignalR authentication
+        options.Events = new JwtBearerEvents
+        {
+            OnMessageReceived = context =>
+            {
+                var accessToken = context.Request.Query["access_token"];
+                var path = context.HttpContext.Request.Path;
+                
+                if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/notificationHub"))
+                {
+                    context.Token = accessToken;
+                }
+                return Task.CompletedTask;
+            }
+        };
     });
 
 // Register services
@@ -64,6 +80,9 @@ builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<DatabaseSeeder>();
 builder.Services.AddScoped<DbSeeder>();
 builder.Services.AddScoped<PermissionService>();
+
+// Register SignalR
+builder.Services.AddSignalR();
 
 // Configure Swagger
 builder.Services.AddEndpointsApiExplorer();
@@ -103,9 +122,10 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowAll",
         builder =>
         {
-            builder.AllowAnyOrigin()
-            .AllowAnyMethod()
-                   .AllowAnyHeader();
+            builder.WithOrigins("http://localhost:5173")
+                   .AllowAnyMethod()
+                   .AllowAnyHeader()
+                   .AllowCredentials();
         });
 });
 
@@ -133,6 +153,9 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+// Map SignalR NotificationHub
+app.MapHub<NotificationHub>("/notificationHub");
 
 // Ensure database is created and migrations are applied
 using (var scope = app.Services.CreateScope())

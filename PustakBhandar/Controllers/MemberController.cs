@@ -6,6 +6,7 @@ using PustakBhandar.Data;
 using PustakBhandar.DTOs;
 using PustakBhandar.Models;
 using System.Security.Claims;
+using Microsoft.AspNetCore.SignalR;
 
 namespace PustakBhandar.Controllers
 {
@@ -17,15 +18,18 @@ namespace PustakBhandar.Controllers
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly ApplicationDbContext _context;
         private readonly ILogger<MemberController> _logger;
+        private readonly IHubContext<NotificationHub> _hubContext;
 
         public MemberController(
             UserManager<ApplicationUser> userManager,
             ApplicationDbContext context,
-            ILogger<MemberController> logger)
+            ILogger<MemberController> logger,
+            IHubContext<NotificationHub> hubContext)
         {
             _userManager = userManager;
             _context = context;
             _logger = logger;
+            _hubContext = hubContext;
         }
 
         [HttpGet("profile")]
@@ -573,6 +577,14 @@ namespace PustakBhandar.Controllers
                 _context.Carts.Remove(cart);
                 await _context.SaveChangesAsync();
 
+                // Send real-time notification to the member
+                await _hubContext.Clients.User(member.Id).SendAsync("ReceiveNotification", new {
+                    message = $"Your order {order.Id} has been placed and is now {order.Status}.",
+                    orderId = order.Id,
+                    status = order.Status,
+                    timestamp = DateTime.UtcNow
+                });
+
                 var response = new PlaceOrderResponseDto
                 {
                     Id = order.Id,
@@ -791,7 +803,8 @@ namespace PustakBhandar.Controllers
                     {
                         Id = n.Id,
                         Message = n.Message,
-                        OrderId = n.OrderId,
+                        OrderId = n.Type == "Announcement" ? null : n.OrderId,
+                        Type = n.Type,
                         Timestamp = n.Timestamp,
                         IsRead = n.IsRead
                     })
@@ -802,6 +815,107 @@ namespace PustakBhandar.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error retrieving notifications");
+                return StatusCode(500, new { status = "error", message = "Internal server error" });
+            }
+        }
+
+        [HttpPut("notifications/{id}/read")]
+        public async Task<IActionResult> MarkNotificationAsRead(string id)
+        {
+            try
+            {
+                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (string.IsNullOrEmpty(userId))
+                    return Unauthorized(new { status = 401, message = "Unauthorized" });
+
+                var notification = await _context.Notifications
+                    .Where(n => n.Id == id && n.MemberId == userId)
+                    .Select(n => new
+                    {
+                        n.Id,
+                        n.MemberId,
+                        n.Message,
+                        n.Type,
+                        n.Timestamp,
+                        n.IsRead,
+                        OrderId = n.Type == "Announcement" ? null : n.OrderId
+                    })
+                    .FirstOrDefaultAsync();
+
+                if (notification == null)
+                    return NotFound(new { status = 404, message = "Notification not found" });
+
+                var notificationToUpdate = new Notification
+                {
+                    Id = notification.Id,
+                    MemberId = notification.MemberId,
+                    Message = notification.Message,
+                    Type = notification.Type,
+                    Timestamp = notification.Timestamp,
+                    OrderId = notification.OrderId,
+                    IsRead = true
+                };
+
+                _context.Notifications.Update(notificationToUpdate);
+                await _context.SaveChangesAsync();
+
+                return Ok(new { status = "success", message = "Notification marked as read" });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error marking notification as read");
+                return StatusCode(500, new { status = "error", message = "Internal server error" });
+            }
+        }
+
+        [HttpPut("notifications/read-all")]
+        public async Task<IActionResult> MarkAllNotificationsAsRead()
+        {
+            try
+            {
+                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (string.IsNullOrEmpty(userId))
+                    return Unauthorized(new { status = 401, message = "Unauthorized" });
+
+                var unreadNotifications = await _context.Notifications
+                    .Where(n => n.MemberId == userId && !n.IsRead)
+                    .Select(n => new
+                    {
+                        n.Id,
+                        n.MemberId,
+                        n.Message,
+                        n.Type,
+                        n.Timestamp,
+                        OrderId = n.Type == "Announcement" ? null : n.OrderId
+                    })
+                    .ToListAsync();
+
+                foreach (var notification in unreadNotifications)
+                {
+                    var notificationToUpdate = new Notification
+                    {
+                        Id = notification.Id,
+                        MemberId = notification.MemberId,
+                        Message = notification.Message,
+                        Type = notification.Type,
+                        Timestamp = notification.Timestamp,
+                        OrderId = notification.OrderId,
+                        IsRead = true
+                    };
+
+                    _context.Notifications.Update(notificationToUpdate);
+                }
+
+                await _context.SaveChangesAsync();
+
+                return Ok(new { 
+                    status = "success", 
+                    message = $"Marked {unreadNotifications.Count} notifications as read" 
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error marking all notifications as read");
                 return StatusCode(500, new { status = "error", message = "Internal server error" });
             }
         }

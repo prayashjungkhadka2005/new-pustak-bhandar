@@ -1,10 +1,12 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using PustakBhandar.Data;
 using PustakBhandar.DTOs;
 using PustakBhandar.Models;
 using System.Security.Claims;
+using Microsoft.AspNetCore.SignalR;
 
 namespace PustakBhandar.Controllers
 {
@@ -13,15 +15,21 @@ namespace PustakBhandar.Controllers
     [Route("api/admin")]
     public class AdminController : ControllerBase
     {
+        private readonly UserManager<ApplicationUser> _userManager;
         private readonly ApplicationDbContext _context;
         private readonly ILogger<AdminController> _logger;
+        private readonly IHubContext<NotificationHub> _hubContext;
 
         public AdminController(
+            UserManager<ApplicationUser> userManager,
             ApplicationDbContext context,
-            ILogger<AdminController> logger)
+            ILogger<AdminController> logger,
+            IHubContext<NotificationHub> hubContext)
         {
+            _userManager = userManager;
             _context = context;
             _logger = logger;
+            _hubContext = hubContext;
         }
 
         [HttpGet("books")]
@@ -751,6 +759,38 @@ namespace PustakBhandar.Controllers
 
                 _context.Announcements.Add(announcement);
                 await _context.SaveChangesAsync();
+
+                // Get all members to send the notification to
+                var members = await _userManager.GetUsersInRoleAsync("Member");
+                
+                // Create notifications for each member
+                foreach (var member in members)
+                {
+                    var notification = new Notification
+                    {
+                        MemberId = member.Id,
+                        OrderId = null, // No order associated with announcements
+                        Message = $"{announcement.Title}: {announcement.Message}",
+                        Type = "Announcement",
+                        Timestamp = DateTime.UtcNow,
+                        IsRead = false
+                    };
+
+                    _context.Notifications.Add(notification);
+                }
+
+                await _context.SaveChangesAsync();
+
+                // Send real-time notifications to all members
+                foreach (var member in members)
+                {
+                    await _hubContext.Clients.User(member.Id).SendAsync("ReceiveNotification", new
+                    {
+                        message = $"{announcement.Title}: {announcement.Message}",
+                        type = "Announcement",
+                        timestamp = DateTime.UtcNow
+                    });
+                }
 
                 var response = new AnnouncementResponseDto
                 {
