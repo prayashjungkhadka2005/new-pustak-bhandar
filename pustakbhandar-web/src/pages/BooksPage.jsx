@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { showError } from '../utils/toast';
 import { StarIcon } from '@heroicons/react/24/outline';
@@ -14,49 +14,110 @@ const BooksPage = () => {
     search: searchParams.get('search') || '',
     sale: searchParams.get('sale') === 'true',
   });
+  const [searchTerm, setSearchTerm] = useState(filters.search);
 
-  useEffect(() => {
-    const fetchBooks = async () => {
-      setLoading(true);
-      try {
-        let url = `${import.meta.env.VITE_API_BASE_URL}/books?`;
-        if (filters.genre) url += `genreId=${filters.genre}&`;
-        if (filters.search) url += `search=${filters.search}&`;
-        if (filters.sale) url += `sale=true&`;
-        if (filters.sort) url += `sort=${filters.sort}`;
+  // Debounced search function
+  const debouncedSearch = useCallback(
+    (value) => {
+      const timer = setTimeout(() => {
+        handleFilterChange('search', value);
+      }, 500);
+      return () => clearTimeout(timer);
+    },
+    []
+  );
 
-        const res = await fetch(url);
-        if (!res.ok) throw new Error('Failed to fetch books');
-        const data = await res.json();
-        setBooks(Array.isArray(data.data) ? data.data : []);
-      } catch (err) {
-        showError('Could not load books.');
-        setBooks([]);
-      } finally {
-        setLoading(false);
+  // Handle search input change
+  const handleSearchChange = (e) => {
+    const value = e.target.value;
+    setSearchTerm(value);
+    debouncedSearch(value);
+  };
+
+  // Fetch books with current filters
+  const fetchBooks = useCallback(async () => {
+    setLoading(true);
+    try {
+      let url = `${import.meta.env.VITE_API_BASE_URL}/books?`;
+      
+      // Add filters to URL
+      if (filters.genre) {
+        url += `genreId=${filters.genre}&`;
       }
-    };
-
-    const fetchGenres = async () => {
-      try {
-        const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/books/genre`);
-        if (!res.ok) throw new Error('Failed to fetch genres');
-        const data = await res.json();
-        setGenres(Array.isArray(data.data) ? data.data : []);
-      } catch {
-        setGenres([]);
+      if (filters.search) {
+        url += `search=${encodeURIComponent(filters.search)}&`;
       }
-    };
+      if (filters.sale) {
+        url += `sale=true&`;
+      }
 
-    fetchBooks();
-    fetchGenres();
+      // Add sorting
+      switch (filters.sort) {
+        case 'price_asc':
+          url += 'sort=price&order=asc';
+          break;
+        case 'price_desc':
+          url += 'sort=price&order=desc';
+          break;
+        case 'rating':
+          url += 'sort=rating&order=desc';
+          break;
+        case 'newest':
+        default:
+          url += 'sort=publicationDate&order=desc';
+          break;
+      }
+
+      console.log('Fetching books with URL:', url); // Debug log
+
+      const res = await fetch(url);
+      if (!res.ok) throw new Error('Failed to fetch books');
+      const data = await res.json();
+      
+      // Filter books based on sale status if needed
+      let filteredBooks = Array.isArray(data.data) ? data.data : [];
+      if (filters.sale) {
+        filteredBooks = filteredBooks.filter(book => book.onSale && book.discountPercentage > 0);
+      }
+      
+      setBooks(filteredBooks);
+    } catch (err) {
+      console.error('Error fetching books:', err); // Debug log
+      showError('Could not load books.');
+      setBooks([]);
+    } finally {
+      setLoading(false);
+    }
   }, [filters]);
 
+  // Fetch genres
+  const fetchGenres = async () => {
+    try {
+      const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/books/genre`);
+      if (!res.ok) throw new Error('Failed to fetch genres');
+      const data = await res.json();
+      setGenres(Array.isArray(data.data) ? data.data : []);
+    } catch {
+      setGenres([]);
+    }
+  };
+
+  // Update filters and URL params
   const handleFilterChange = (key, value) => {
     const newFilters = { ...filters, [key]: value };
     setFilters(newFilters);
     setSearchParams(newFilters);
   };
+
+  // Effect to fetch books when filters change
+  useEffect(() => {
+    fetchBooks();
+  }, [fetchBooks]);
+
+  // Effect to fetch genres on mount
+  useEffect(() => {
+    fetchGenres();
+  }, []);
 
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat('en-US', {
@@ -100,8 +161,8 @@ const BooksPage = () => {
                 type="text"
                 placeholder="Search books..."
                 className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                value={filters.search}
-                onChange={(e) => handleFilterChange('search', e.target.value)}
+                value={searchTerm}
+                onChange={handleSearchChange}
               />
             </div>
             {/* Genre Filter */}
