@@ -4,7 +4,6 @@ import {
   ClipboardDocumentListIcon,
   UserGroupIcon,
   ChartBarIcon,
-  BellIcon,
 } from '@heroicons/react/24/outline';
 import { useAuth } from '../../context/AuthContext';
 import { usePermissions } from '../../hooks/usePermissions';
@@ -28,12 +27,6 @@ const navigation = [
     href: '/staff/reports',
     icon: ChartBarIcon,
     permission: Permissions.VIEW_REPORTS
-  },
-  {
-    name: 'Notifications',
-    href: '/staff/notifications',
-    icon: BellIcon,
-    permission: Permissions.VIEW_NOTIFICATIONS
   }
 ];
 

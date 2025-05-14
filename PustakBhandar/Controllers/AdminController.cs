@@ -54,7 +54,9 @@ namespace PustakBhandar.Controllers
                         Price = b.Price,
                         PublicationDate = b.PublicationDate,
                         Quantity = b.Quantity,
-                        Rating = b.Rating,
+                        Rating = b.Reviews.Any() 
+                            ? (decimal)b.Reviews.Average(r => r.Rating)
+                            : 0,
                         OnSale = b.OnSale,
                         DiscountId = b.DiscountId,
                         DiscountPercentage = b.Discount != null ? b.Discount.Percentage : null,
@@ -239,7 +241,9 @@ namespace PustakBhandar.Controllers
                         Price = createdBook.Price,
                         PublicationDate = createdBook.PublicationDate,
                         Quantity = createdBook.Quantity,
-                        Rating = createdBook.Rating,
+                        Rating = createdBook.Reviews.Any() 
+                            ? (decimal)createdBook.Reviews.Average(r => r.Rating)
+                            : 0,
                         OnSale = createdBook.OnSale,
                         DiscountId = createdBook.DiscountId,
                         DiscountPercentage = createdBook.Discount?.Percentage,
@@ -433,7 +437,9 @@ namespace PustakBhandar.Controllers
                         Price = updatedBook.Price,
                         PublicationDate = updatedBook.PublicationDate,
                         Quantity = updatedBook.Quantity,
-                        Rating = updatedBook.Rating,
+                        Rating = updatedBook.Reviews.Any() 
+                            ? (decimal)updatedBook.Reviews.Average(r => r.Rating)
+                            : 0,
                         OnSale = updatedBook.OnSale,
                         DiscountId = updatedBook.DiscountId,
                         DiscountPercentage = updatedBook.Discount?.Percentage,

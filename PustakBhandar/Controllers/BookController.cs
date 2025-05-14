@@ -43,11 +43,14 @@ namespace PustakBhandar.Controllers
                     Price = b.Price,
                     PublicationDate = b.PublicationDate,
                     Quantity = b.Quantity,
-                    Rating = b.Rating,
+                    Rating = b.Reviews.Any() 
+                        ? (decimal)b.Reviews.Average(r => r.Rating)
+                        : 0,
                     OnSale = b.OnSale,
                     DiscountId = b.DiscountId,
                     DiscountPercentage = b.Discount != null ? b.Discount.Percentage : null,
-                    CreatedAt = b.CreatedAt
+                    CreatedAt = b.CreatedAt,
+                    CoverImageUrl = b.CoverImageUrl
                 })
                 .ToListAsync();
 
@@ -77,11 +80,14 @@ namespace PustakBhandar.Controllers
                     Price = b.Price,
                     PublicationDate = b.PublicationDate,
                     Quantity = b.Quantity,
-                    Rating = b.Rating,
+                    Rating = b.Reviews.Any() 
+                        ? (decimal)b.Reviews.Average(r => r.Rating)
+                        : 0,
                     OnSale = b.OnSale,
                     DiscountId = b.DiscountId,
                     DiscountPercentage = b.Discount != null ? b.Discount.Percentage : null,
-                    CreatedAt = b.CreatedAt
+                    CreatedAt = b.CreatedAt,
+                    CoverImageUrl = b.CoverImageUrl
                 })
                 .ToListAsync();
 
@@ -114,14 +120,33 @@ namespace PustakBhandar.Controllers
                 Price = book.Price,
                 PublicationDate = book.PublicationDate,
                 Quantity = book.Quantity,
-                Rating = book.Rating,
+                Rating = book.Reviews.Any() 
+                    ? (decimal)book.Reviews.Average(r => r.Rating)
+                    : 0,
                 OnSale = book.OnSale,
                 DiscountId = book.DiscountId,
                 DiscountPercentage = book.Discount != null ? book.Discount.Percentage : null,
-                CreatedAt = book.CreatedAt
+                CreatedAt = book.CreatedAt,
+                CoverImageUrl = book.CoverImageUrl
             };
 
             return Ok(new { status = "success", message = "Book retrieved successfully", data = response });
+        }
+
+        // GET: /api/books/genre
+        [HttpGet("genre")]
+        public async Task<ActionResult<IEnumerable<GenreResponseDto>>> GetAllGenres()
+        {
+            var genres = await _context.Genres
+                .OrderBy(g => g.Name)
+                .Select(g => new GenreResponseDto
+                {
+                    Id = g.Id,
+                    Name = g.Name
+                })
+                .ToListAsync();
+
+            return Ok(new { status = "success", message = "Genres retrieved successfully", data = genres });
         }
 
         // GET: /api/books/genre/{genreId}
@@ -147,11 +172,14 @@ namespace PustakBhandar.Controllers
                     Price = b.Price,
                     PublicationDate = b.PublicationDate,
                     Quantity = b.Quantity,
-                    Rating = b.Rating,
+                    Rating = b.Reviews.Any() 
+                        ? (decimal)b.Reviews.Average(r => r.Rating)
+                        : 0,
                     OnSale = b.OnSale,
                     DiscountId = b.DiscountId,
                     DiscountPercentage = b.Discount != null ? b.Discount.Percentage : null,
-                    CreatedAt = b.CreatedAt
+                    CreatedAt = b.CreatedAt,
+                    CoverImageUrl = b.CoverImageUrl
                 })
                 .ToListAsync();
 
@@ -181,11 +209,14 @@ namespace PustakBhandar.Controllers
                     Price = b.Price,
                     PublicationDate = b.PublicationDate,
                     Quantity = b.Quantity,
-                    Rating = b.Rating,
+                    Rating = b.Reviews.Any() 
+                        ? (decimal)b.Reviews.Average(r => r.Rating)
+                        : 0,
                     OnSale = b.OnSale,
                     DiscountId = b.DiscountId,
                     DiscountPercentage = b.Discount != null ? b.Discount.Percentage : null,
-                    CreatedAt = b.CreatedAt
+                    CreatedAt = b.CreatedAt,
+                    CoverImageUrl = b.CoverImageUrl
                 })
                 .ToListAsync();
 
@@ -215,11 +246,14 @@ namespace PustakBhandar.Controllers
                     Price = b.Price,
                     PublicationDate = b.PublicationDate,
                     Quantity = b.Quantity,
-                    Rating = b.Rating,
+                    Rating = b.Reviews.Any() 
+                        ? (decimal)b.Reviews.Average(r => r.Rating)
+                        : 0,
                     OnSale = b.OnSale,
                     DiscountId = b.DiscountId,
                     DiscountPercentage = b.Discount != null ? b.Discount.Percentage : null,
-                    CreatedAt = b.CreatedAt
+                    CreatedAt = b.CreatedAt,
+                    CoverImageUrl = b.CoverImageUrl
                 })
                 .ToListAsync();
 
@@ -266,15 +300,71 @@ namespace PustakBhandar.Controllers
                     Price = b.Price,
                     PublicationDate = b.PublicationDate,
                     Quantity = b.Quantity,
-                    Rating = b.Rating,
+                    Rating = b.Reviews.Any() 
+                        ? (decimal)b.Reviews.Average(r => r.Rating)
+                        : 0,
                     OnSale = b.OnSale,
                     DiscountId = b.DiscountId,
                     DiscountPercentage = b.Discount != null ? b.Discount.Percentage : null,
-                    CreatedAt = b.CreatedAt
+                    CreatedAt = b.CreatedAt,
+                    CoverImageUrl = b.CoverImageUrl
                 })
                 .ToListAsync();
 
             return Ok(new { status = "success", message = "Books retrieved successfully", data = books });
+        }
+
+        // GET: /api/books/reviews
+        [HttpGet("reviews")]
+        public async Task<ActionResult<IEnumerable<ReviewResponseDto>>> GetRecentReviews()
+        {
+            var reviews = await _context.Reviews
+                .Include(r => r.Book)
+                .Include(r => r.Member)
+                .OrderByDescending(r => r.ReviewDate)
+                .Take(3)
+                .Select(r => new ReviewResponseDto
+                {
+                    Id = r.Id,
+                    BookId = r.BookId,
+                    MemberId = r.MemberId,
+                    Rating = r.Rating,
+                    Comment = r.Comment ?? string.Empty,
+                    ReviewDate = r.ReviewDate,
+                    BookTitle = r.Book.Title,
+                    MemberName = r.Member.FullName
+                })
+                .ToListAsync();
+
+            return Ok(new { status = "success", message = "Reviews retrieved successfully", data = reviews });
+        }
+
+        [HttpGet("{id}/reviews")]
+        public async Task<ActionResult<IEnumerable<ReviewResponseDto>>> GetBookReviews(string id)
+        {
+            var book = await _context.Books
+                .Include(b => b.Reviews)
+                    .ThenInclude(r => r.Member)
+                .FirstOrDefaultAsync(b => b.Id == id);
+
+            if (book == null)
+            {
+                return NotFound(new { status = "error", message = "Book not found" });
+            }
+
+            var reviews = book.Reviews.Select(r => new ReviewResponseDto
+            {
+                Id = r.Id,
+                BookId = r.BookId,
+                MemberId = r.MemberId,
+                Rating = r.Rating,
+                Comment = r.Comment ?? string.Empty,
+                ReviewDate = r.ReviewDate,
+                BookTitle = book.Title,
+                MemberName = r.Member.FullName
+            });
+
+            return Ok(new { status = "success", message = "Reviews retrieved successfully", data = reviews });
         }
     }
 } 

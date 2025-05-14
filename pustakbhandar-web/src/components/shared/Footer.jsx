@@ -4,13 +4,14 @@ import { Link } from 'react-router-dom';
 const Footer = () => {
   return (
     <footer className="bg-gray-800 text-white">
-      <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-          {/* About */}
+          {/* About Section */}
           <div>
             <h3 className="text-lg font-semibold mb-4">About PustakBhandar</h3>
-            <p className="text-gray-300">
-              Your one-stop destination for all your reading needs. Discover, explore, and enjoy books from various genres.
+            <p className="text-gray-300 text-sm">
+              Your one-stop destination for quality books and educational resources.
+              We provide a wide range of books across various genres and formats.
             </p>
           </div>
 
@@ -19,63 +20,61 @@ const Footer = () => {
             <h3 className="text-lg font-semibold mb-4">Quick Links</h3>
             <ul className="space-y-2">
               <li>
-                <Link to="/books" className="text-gray-300 hover:text-white">
+                <Link to="/" className="text-gray-300 hover:text-white text-sm">
+                  Home
+                </Link>
+              </li>
+              <li>
+                <Link to="/books" className="text-gray-300 hover:text-white text-sm">
                   Books
                 </Link>
               </li>
               <li>
-                <Link to="/cart" className="text-gray-300 hover:text-white">
-                  Cart
-                </Link>
-              </li>
-              <li>
-                <Link to="/wishlist" className="text-gray-300 hover:text-white">
-                  Wishlist
-                </Link>
-              </li>
-              <li>
-                <Link to="/orders" className="text-gray-300 hover:text-white">
-                  Orders
+                <Link to="/categories" className="text-gray-300 hover:text-white text-sm">
+                  Categories
                 </Link>
               </li>
             </ul>
           </div>
 
-          {/* Contact */}
+          {/* Help & Support */}
           <div>
-            <h3 className="text-lg font-semibold mb-4">Contact Us</h3>
-            <ul className="space-y-2 text-gray-300">
+            <h3 className="text-lg font-semibold mb-4">Help & Support</h3>
+            <ul className="space-y-2">
+              <li>
+                <Link to="/faq" className="text-gray-300 hover:text-white text-sm">
+                  FAQ
+                </Link>
+              </li>
+              <li>
+                <Link to="/contact" className="text-gray-300 hover:text-white text-sm">
+                  Contact Us
+                </Link>
+              </li>
+              <li>
+                <Link to="/shipping" className="text-gray-300 hover:text-white text-sm">
+                  Shipping Information
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          {/* Contact Info */}
+          <div>
+            <h3 className="text-lg font-semibold mb-4">Contact Info</h3>
+            <ul className="space-y-2 text-sm text-gray-300">
               <li>Email: support@pustakbhandar.com</li>
-              <li>Phone: +1 234 567 890</li>
-              <li>Address: 123 Book Street, Reading City</li>
+              <li>Phone: +1 (555) 123-4567</li>
+              <li>Address: 123 Book Street, Reading City, RC 12345</li>
             </ul>
-          </div>
-
-          {/* Newsletter */}
-          <div>
-            <h3 className="text-lg font-semibold mb-4">Newsletter</h3>
-            <p className="text-gray-300 mb-4">
-              Subscribe to our newsletter for updates and offers.
-            </p>
-            <form className="flex gap-2">
-              <input
-                type="email"
-                placeholder="Enter your email"
-                className="px-4 py-2 rounded text-gray-900 w-full"
-              />
-              <button
-                type="submit"
-                className="bg-blue-600 px-4 py-2 rounded hover:bg-blue-700"
-              >
-                Subscribe
-              </button>
-            </form>
           </div>
         </div>
 
         {/* Copyright */}
-        <div className="mt-8 pt-8 border-t border-gray-700 text-center text-gray-300">
-          <p>&copy; {new Date().getFullYear()} PustakBhandar. All rights reserved.</p>
+        <div className="mt-8 pt-8 border-t border-gray-700">
+          <p className="text-center text-gray-300 text-sm">
+            © {new Date().getFullYear()} PustakBhandar. All rights reserved.
+          </p>
         </div>
       </div>
     </footer>

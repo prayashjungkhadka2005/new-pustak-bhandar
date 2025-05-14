@@ -18,6 +18,42 @@
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
       <OriginalItemSpec>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\uploads\covers\329b2025-fc13-4f58-8c58-27d35184b5e1.jpg'))</OriginalItemSpec>
     </StaticWebAsset>
+    <StaticWebAsset Include="$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\uploads\covers\45ab3fe3-967a-4ade-88fb-36fb850f57c8.jpg'))">
+      <SourceType>Package</SourceType>
+      <SourceId>PustakBhandar</SourceId>
+      <ContentRoot>$(MSBuildThisFileDirectory)..\staticwebassets\</ContentRoot>
+      <BasePath>_content/PustakBhandar</BasePath>
+      <RelativePath>uploads/covers/45ab3fe3-967a-4ade-88fb-36fb850f57c8.jpg</RelativePath>
+      <AssetKind>All</AssetKind>
+      <AssetMode>All</AssetMode>
+      <AssetRole>Primary</AssetRole>
+      <RelatedAsset></RelatedAsset>
+      <AssetTraitName></AssetTraitName>
+      <AssetTraitValue></AssetTraitValue>
+      <Fingerprint>os0vszxxrc</Fingerprint>
+      <Integrity>yG1KNC304+E8moTgiLDLkCUDuoAJJQ+QF1FT9GDEiBQ=</Integrity>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <OriginalItemSpec>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\uploads\covers\45ab3fe3-967a-4ade-88fb-36fb850f57c8.jpg'))</OriginalItemSpec>
+    </StaticWebAsset>
+    <StaticWebAsset Include="$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\uploads\covers\646669af-3912-4947-9c28-003c19ca5548.jpg'))">
+      <SourceType>Package</SourceType>
+      <SourceId>PustakBhandar</SourceId>
+      <ContentRoot>$(MSBuildThisFileDirectory)..\staticwebassets\</ContentRoot>
+      <BasePath>_content/PustakBhandar</BasePath>
+      <RelativePath>uploads/covers/646669af-3912-4947-9c28-003c19ca5548.jpg</RelativePath>
+      <AssetKind>All</AssetKind>
+      <AssetMode>All</AssetMode>
+      <AssetRole>Primary</AssetRole>
+      <RelatedAsset></RelatedAsset>
+      <AssetTraitName></AssetTraitName>
+      <AssetTraitValue></AssetTraitValue>
+      <Fingerprint>evw1yn0imd</Fingerprint>
+      <Integrity>qvrnD+J6M6EGdNv/wFPTl7UshLlXlLu1UwdSKRYSO2k=</Integrity>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <OriginalItemSpec>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\uploads\covers\646669af-3912-4947-9c28-003c19ca5548.jpg'))</OriginalItemSpec>
+    </StaticWebAsset>
     <StaticWebAsset Include="$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\uploads\covers\802422a8-0f15-4066-8bad-f0909704c394.png'))">
       <SourceType>Package</SourceType>
       <SourceId>PustakBhandar</SourceId>
