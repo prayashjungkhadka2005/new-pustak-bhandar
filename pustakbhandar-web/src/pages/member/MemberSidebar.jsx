@@ -1,21 +1,22 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { HomeIcon, UserIcon, ShoppingCartIcon, HeartIcon } from '@heroicons/react/24/outline';
+import { HomeIcon, UserIcon, ShoppingCartIcon, HeartIcon, ShoppingBagIcon, StarIcon } from '@heroicons/react/24/outline';
 import { useAuth } from '../../context/AuthContext';
 
 const navigation = [
   { name: 'Dashboard', href: '/member/dashboard', icon: HomeIcon },
   { name: 'Profile', href: '/member/profile', icon: UserIcon },
   { name: 'Orders', href: '/member/orders', icon: ShoppingCartIcon },
-  { name: 'Cart', href: '/member/cart', icon: ShoppingCartIcon },
+  { name: 'Cart', href: '/member/cart', icon: ShoppingBagIcon },
   { name: 'Wishlist', href: '/member/wishlist', icon: HeartIcon },
+  { name: 'Ratings & Reviews', href: '/member/reviews', icon: StarIcon },
 ];
 
 const MemberSidebar = ({ isOpen }) => {
   const { user } = useAuth();
   const location = useLocation();
   return (
-    <div className="w-64 bg-[#232946] shadow-lg border-r border-[#E5E7EB] flex flex-col">
+    <div className="w-64 h-full bg-[#232946] shadow-lg border-r border-[#E5E7EB] flex flex-col">
       {/* Logo */}
       <div className="h-16 flex items-center justify-center border-b border-[#E5E7EB]">
         <div className="flex items-center space-x-3">
@@ -52,17 +53,19 @@ const MemberSidebar = ({ isOpen }) => {
         </div>
       </nav>
       {/* Member Info */}
-      <div className="mt-auto p-4 border-t border-[#E5E7EB]">
-        <div className="flex items-center space-x-3">
-          <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center">
-            <span className="text-sm font-medium text-[#232946]">{user?.fullName?.[0] || 'M'}</span>
-          </div>
-          <div>
-            <p className="text-sm font-medium text-white">{user?.fullName || 'Member'}</p>
-            <p className="text-xs text-[#E5E7EB]">{user?.email || 'member@example.com'}</p>
-          </div>
+      <button
+        className="w-full flex items-center space-x-3 p-4 border-t border-[#E5E7EB] bg-[#232946] hover:bg-[#1a1f36] transition-colors duration-200 focus:outline-none"
+        style={{ minHeight: '72px' }}
+        // onClick={() => { /* future: open profile modal or page */ }}
+      >
+        <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center">
+          <span className="text-sm font-medium text-[#232946]">{user?.fullName?.[0] || 'M'}</span>
         </div>
-      </div>
+        <div className="flex flex-col text-left">
+          <span className="text-sm font-medium text-white">{user?.fullName || 'Member'}</span>
+          <span className="text-xs text-[#E5E7EB]">{user?.email || 'member@example.com'}</span>
+        </div>
+      </button>
     </div>
   );
 };

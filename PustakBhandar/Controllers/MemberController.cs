@@ -805,5 +805,44 @@ namespace PustakBhandar.Controllers
                 return StatusCode(500, new { status = "error", message = "Internal server error" });
             }
         }
+
+        [HttpGet("reviews")]
+        public async Task<ActionResult<List<object>>> GetMemberReviews()
+        {
+            try
+            {
+                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (string.IsNullOrEmpty(userId))
+                    return Unauthorized(new { status = 401, message = "Unauthorized" });
+
+                var reviews = await _context.Reviews
+                    .Where(r => r.MemberId == userId)
+                    .OrderByDescending(r => r.ReviewDate)
+                    .ToListAsync();
+
+                // Get book titles for all reviewed books
+                var bookIds = reviews.Select(r => r.BookId).Distinct().ToList();
+                var bookTitles = await _context.Books
+                    .Where(b => bookIds.Contains(b.Id))
+                    .ToDictionaryAsync(b => b.Id, b => b.Title);
+
+                var response = reviews.Select(r => new
+                {
+                    Id = r.Id,
+                    BookId = r.BookId,
+                    BookTitle = bookTitles.ContainsKey(r.BookId) ? bookTitles[r.BookId] : "",
+                    Rating = r.Rating,
+                    Comment = r.Comment,
+                    ReviewDate = r.ReviewDate
+                }).ToList();
+
+                return Ok(new { status = 200, data = response });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving member reviews");
+                return StatusCode(500, new { status = 500, message = "Internal server error" });
+            }
+        }
     }
 } 

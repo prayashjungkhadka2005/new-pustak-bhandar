@@ -21,6 +21,10 @@ import UserManagementPage from './pages/admin/UserManagementPage';
 import MemberLayout from './pages/member/MemberLayout';
 import MemberDashboard from './pages/member/MemberDashboard';
 import OrdersPage from './pages/member/OrdersPage';
+import CartPage from './pages/member/CartPage';
+import WishlistPage from './pages/member/WishlistPage';
+import ProfilePage from './pages/member/ProfilePage';
+import ReviewsPage from './pages/member/ReviewsPage';
 
 function App() {
   return (
@@ -116,7 +120,11 @@ function App() {
           >
             <Route index element={<Navigate to="dashboard" replace />} />
             <Route path="dashboard" element={<MemberDashboard />} />
+            <Route path="profile" element={<ProfilePage />} />
             <Route path="orders" element={<OrdersPage />} />
+            <Route path="cart" element={<CartPage />} />
+            <Route path="wishlist" element={<WishlistPage />} />
+            <Route path="reviews" element={<ReviewsPage />} />
             {/* Add more member routes here */}
           </Route>
 
