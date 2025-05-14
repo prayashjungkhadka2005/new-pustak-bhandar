@@ -12,7 +12,8 @@ import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
 import AdminLayout from './pages/admin/AdminLayout';
 import Dashboard from './pages/admin/Dashboard';
-import StaffDashboard from './pages/staff/Dashboard';
+import StaffLayout from './pages/staff/StaffLayout';
+import OrdersPage from './pages/staff/OrdersPage';
 import AddBook from './pages/admin/AddBook';
 import DiscountPage from './pages/admin/DiscountPage';
 import AnnouncementPage from './pages/admin/AnnouncementPage';
@@ -20,7 +21,7 @@ import OrderPage from './pages/admin/OrderPage';
 import UserManagementPage from './pages/admin/UserManagementPage';
 import MemberLayout from './pages/member/MemberLayout';
 import MemberDashboard from './pages/member/MemberDashboard';
-import OrdersPage from './pages/member/OrdersPage';
+import MemberOrdersPage from './pages/member/OrdersPage';
 import CartPage from './pages/member/CartPage';
 import WishlistPage from './pages/member/WishlistPage';
 import ProfilePage from './pages/member/ProfilePage';
@@ -101,13 +102,19 @@ function App() {
 
           {/* Protected Staff Routes */}
           <Route
-            path="/staff/dashboard"
+            path="/staff"
             element={
               <PermissionRoute permission={Permissions.VIEW_ORDERS}>
-                <StaffDashboard />
+                <StaffLayout />
               </PermissionRoute>
             }
-          />
+          >
+            <Route index element={<Navigate to="orders" replace />} />
+            <Route path="orders" element={<OrdersPage />} />
+            <Route path="users" element={<div>Users Page (Coming Soon)</div>} />
+            <Route path="reports" element={<div>Reports Page (Coming Soon)</div>} />
+            <Route path="notifications" element={<div>Notifications Page (Coming Soon)</div>} />
+          </Route>
 
           {/* Protected Member Routes (nested) */}
           <Route
@@ -121,7 +128,7 @@ function App() {
             <Route index element={<Navigate to="dashboard" replace />} />
             <Route path="dashboard" element={<MemberDashboard />} />
             <Route path="profile" element={<ProfilePage />} />
-            <Route path="orders" element={<OrdersPage />} />
+            <Route path="orders" element={<MemberOrdersPage />} />
             <Route path="cart" element={<CartPage />} />
             <Route path="wishlist" element={<WishlistPage />} />
             <Route path="reviews" element={<ReviewsPage />} />

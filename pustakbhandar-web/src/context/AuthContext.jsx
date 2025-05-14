@@ -99,7 +99,7 @@ export const AuthProvider = ({ children }) => {
       if (data.roles.includes('Admin')) {
         navigate('/admin', { replace: true });
       } else if (data.roles.includes('Staff')) {
-        navigate('/staff/dashboard', { replace: true });
+        navigate('/staff/orders', { replace: true });
       } else if (data.roles.includes('Member')) {
         navigate('/member/dashboard', { replace: true });
       } else {

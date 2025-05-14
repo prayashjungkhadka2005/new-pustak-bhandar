@@ -26,20 +26,16 @@ const Login = () => {
     try {
       const response = await login(formData.email, formData.password);
       showSuccess('Login successful!');
-      // Redirect based on role from the response
-      const userRole = response?.roles?.[0] || response?.user?.roles?.[0]; // Accommodate different possible response structures
-      switch (userRole) {
-        case 'Admin':
-          navigate('/admin/dashboard');
-          break;
-        case 'Staff':
-          navigate('/staff/dashboard');
-          break;
-        case 'Member':
-          navigate('/member/dashboard');
-          break;
-        default:
-          navigate('/');
+      
+      // Check roles array directly from response
+      if (response.roles.includes('Staff')) {
+        navigate('/staff/orders');
+      } else if (response.roles.includes('Admin')) {
+        navigate('/admin/dashboard');
+      } else if (response.roles.includes('Member')) {
+        navigate('/member/dashboard');
+      } else {
+        navigate('/');
       }
     } catch (error) {
       showError(error.message || 'Login failed');
